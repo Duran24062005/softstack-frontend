@@ -1,37 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SoftStack Frontend
 
-## Getting Started
+Frontend Next.js de la plataforma educativa SoftStack.
 
-First, run the development server:
+## Desarrollo
+
+Instala dependencias y define la URL del backend:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+echo 'BACKEND_URL=http://localhost:8000' > .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de sesión en el dominio del frontend y reenvía las solicitudes a FastAPI.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Rutas principales
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/` — landing pública.
+- `/login` y `/register` — autenticación.
+- `/dashboard` — ruta de aprendizaje y progreso.
+- `/dashboard/profile` — edición de perfil.
+- `/dashboard/modules/:id` y `/dashboard/lessons/:id` — consumo de contenido.
+- `/admin/modules`, `/admin/modules/new` y `/admin/modules/:id` — catálogo, creación de módulos y listado de lecciones del módulo.
+- `/admin/lessons/new` — editor Tiptap para administradores.
 
-## Learn More
+La interfaz usa Tailwind v4, `motion/react` para animaciones accesibles y Tiptap para documentos estructurados.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# softstack-frontend
+Los módulos se crean desde `/admin/modules/new` con título, descripción, orden y estado (`draft`, `published` o `archived`). Al guardarlos, la interfaz vuelve al catálogo. Al crear o editar una lección, vuelve automáticamente al módulo donde pertenece. El editor usa controles contextuales al lado del bloque activo, además de una barra flotante para formato inline cuando se selecciona texto.
