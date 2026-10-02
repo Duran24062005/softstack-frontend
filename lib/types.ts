@@ -23,6 +23,13 @@ export type TiptapDocument = {
   content: Array<Record<string, unknown>>;
 };
 
+export type MediaReference = {
+  url: string;
+  pathname: string;
+  content_type: string;
+  size: number;
+};
+
 export type Module = {
   id: string;
   title: string;
@@ -30,6 +37,7 @@ export type Module = {
   description: string;
   order: number;
   status: "draft" | "published" | "archived";
+  cover_media: MediaReference | null;
   created_at: string;
   updated_at: string;
 };

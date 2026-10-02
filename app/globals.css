@@ -60,6 +60,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .tiptap-content blockquote, .editor-frame .ProseMirror blockquote { margin: 1.25rem 0; border-left: 3px solid var(--lime); padding-left: 1rem; color: rgba(17,20,17,.62); font-style: italic; }
 .tiptap-content pre, .editor-frame .ProseMirror pre { overflow-x: auto; border-radius: .8rem; background: var(--ink); padding: 1rem; color: var(--lime); }
 .tiptap-content img, .editor-frame .ProseMirror img { max-width: 100%; border-radius: 1rem; }
+.tiptap-content video, .editor-frame .ProseMirror video { display: block; width: 100%; max-height: 520px; border-radius: 1rem; background: var(--ink); }
 @media (min-width: 640px) { .app-main { padding-left: 2.5rem; padding-right: 2.5rem; } }
 @media (min-width: 1024px) { .app-main { padding: 3.5rem 4rem 6rem; } }
 @media (max-width: 639px) { .editor-canvas .ProseMirror { padding-right: 1.25rem; padding-left: 4rem; } .block-format-menu { max-width: calc(100vw - 2rem); } }
