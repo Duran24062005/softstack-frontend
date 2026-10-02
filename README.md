@@ -21,11 +21,13 @@ El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de ses
 - `/verify-email` — confirmación de la cuenta mediante enlace.
 - `/forgot-password` y `/reset-password` — solicitud y aplicación del código de recuperación.
 - `/dashboard` — ruta de aprendizaje y progreso.
-- `/dashboard/profile` — edición de perfil.
+- `/dashboard/profile` — edición de perfil y gestión de foto privada.
 - `/dashboard/modules/:id` y `/dashboard/lessons/:id` — consumo de contenido.
 - `/admin/modules`, `/admin/modules/new` y `/admin/modules/:id` — catálogo, creación de módulos y listado de lecciones del módulo.
 - `/admin/lessons/new` — editor Tiptap para administradores.
 
 La interfaz usa Tailwind v4, `motion/react` para animaciones accesibles y Tiptap para documentos estructurados.
+
+La foto de perfil se carga mediante `multipart/form-data` al BFF y el backend la almacena en Vercel Blob privado. El navegador nunca recibe el token de Blob; la imagen se sirve desde `/api/backend/auth/me/profile-photo` con la sesión autenticada.
 
 Los módulos se crean desde `/admin/modules/new` con título, descripción, orden y estado (`draft`, `published` o `archived`). Al guardarlos, la interfaz vuelve al catálogo. Al crear o editar una lección, vuelve automáticamente al módulo donde pertenece. El editor usa controles contextuales al lado del bloque activo, además de una barra flotante para formato inline cuando se selecciona texto.
