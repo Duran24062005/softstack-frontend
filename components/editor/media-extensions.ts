@@ -1,6 +1,5 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
 import StarterKit from "@tiptap/starter-kit";
 
 export const ContentImage = Image.extend({
@@ -40,5 +39,5 @@ export const ContentVideo = Node.create({
 });
 
 export function createContentExtensions({ openOnClick = false }: { openOnClick?: boolean } = {}) {
-  return [StarterKit, Link.configure({ openOnClick }), ContentImage, ContentVideo];
+  return [StarterKit.configure({ link: { openOnClick } }), ContentImage, ContentVideo];
 }

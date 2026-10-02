@@ -92,6 +92,11 @@ describe("content media helpers", () => {
   });
 
   it("registers shared image and video extensions for editor and reader", () => {
-    expect(createContentExtensions().map((extension) => extension.name)).toEqual(expect.arrayContaining(["image", "video"]));
+    const extensions = createContentExtensions({ openOnClick: true });
+    const starterKit = extensions.find((extension) => extension.name === "starterKit");
+
+    expect(extensions.map((extension) => extension.name)).toEqual(expect.arrayContaining(["image", "video"]));
+    expect(extensions.map((extension) => extension.name)).not.toContain("link");
+    expect(starterKit?.options.link).toMatchObject({ openOnClick: true });
   });
 });
