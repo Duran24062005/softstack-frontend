@@ -44,6 +44,8 @@ La interfaz usa Tailwind v4, `motion/react` para animaciones accesibles y Tiptap
 
 El editor de lecciones permite cargar imágenes y videos directamente a un Blob Store público mediante `/api/content-media/upload`. Las URLs y metadatos se guardan en el documento MongoDB; las URLs pegadas se importan al mismo store antes de insertarse. Los módulos admiten una portada multimedia opcional. Configura `CONTENT_BLOB_READ_WRITE_TOKEN` únicamente en el entorno server-side de Next.js y del backend; nunca uses `NEXT_PUBLIC_` para este secreto.
 
+Si la carga muestra `Vercel Blob: Failed to retrieve the client token` y `/api/content-media/upload` responde `503`, falta `CONTENT_BLOB_READ_WRITE_TOKEN` en el entorno del frontend. Configúralo en el entorno de despliegue de Next.js y vuelve a desplegar; el token debe pertenecer al Blob Store público de contenido y mantenerse como variable server-side.
+
 La foto de perfil se carga mediante `multipart/form-data` al BFF y el backend la almacena en Vercel Blob privado. El navegador nunca recibe el token de Blob; la imagen se sirve desde `/api/backend/auth/me/profile-photo` con la sesión autenticada.
 
 Los módulos se crean desde `/admin/modules/new` con título, descripción, orden y estado (`draft`, `published` o `archived`). Al guardarlos, la interfaz vuelve al catálogo. Al crear o editar una lección, vuelve automáticamente al módulo donde pertenece. El editor usa controles contextuales al lado del bloque activo, además de una barra flotante para formato inline cuando se selecciona texto.
