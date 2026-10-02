@@ -18,6 +18,12 @@ Las pruebas unitarias del flujo multimedia se ejecutan con:
 pnpm test
 ```
 
+La instalación permite el script de build de `esbuild`, requerido por las
+herramientas de compilación del frontend. Los scripts de `sharp` y
+`unrs-resolver` permanecen bloqueados porque no son necesarios para este
+proyecto; esta política se define en `pnpm-workspace.yaml` y también se aplica
+en los builds de Vercel.
+
 Vitest cubre validación de MIME y tamaño, carga directa con progreso, importación de URLs y recorrido recursivo de nodos Tiptap.
 
 El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de sesión en el dominio del frontend y reenvía las solicitudes a FastAPI.
