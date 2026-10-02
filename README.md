@@ -17,7 +17,9 @@ El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de ses
 ## Rutas principales
 
 - `/` — landing pública.
-- `/login` y `/register` — autenticación.
+- `/login` y `/register` — autenticación y creación de cuenta.
+- `/verify-email` — confirmación de la cuenta mediante enlace.
+- `/forgot-password` y `/reset-password` — solicitud y aplicación del código de recuperación.
 - `/dashboard` — ruta de aprendizaje y progreso.
 - `/dashboard/profile` — edición de perfil.
 - `/dashboard/modules/:id` y `/dashboard/lessons/:id` — consumo de contenido.
