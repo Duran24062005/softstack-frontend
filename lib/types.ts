@@ -7,6 +7,7 @@ export type User = {
   role: UserRole;
   is_active: boolean;
   email_verified: boolean;
+  has_profile_photo: boolean;
   created_at: string;
 };
 
