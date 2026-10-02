@@ -6,12 +6,15 @@ export type User = {
   email: string;
   role: UserRole;
   is_active: boolean;
+  email_verified: boolean;
   created_at: string;
 };
 
 export type AuthSession = {
   user: User;
   expires_in: number;
+  verification_required?: boolean;
+  message?: string | null;
 };
 
 export type TiptapDocument = {
