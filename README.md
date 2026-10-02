@@ -12,6 +12,14 @@ echo 'BACKEND_URL=http://localhost:8000' > .env.local
 pnpm dev
 ```
 
+Las pruebas unitarias del flujo multimedia se ejecutan con:
+
+```bash
+pnpm test
+```
+
+Vitest cubre validación de MIME y tamaño, carga directa con progreso, importación de URLs y recorrido recursivo de nodos Tiptap.
+
 El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de sesión en el dominio del frontend y reenvía las solicitudes a FastAPI.
 
 ## Rutas principales
@@ -27,6 +35,8 @@ El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de ses
 - `/admin/lessons/new` — editor Tiptap para administradores.
 
 La interfaz usa Tailwind v4, `motion/react` para animaciones accesibles y Tiptap para documentos estructurados.
+
+El editor de lecciones permite cargar imágenes y videos directamente a un Blob Store público mediante `/api/content-media/upload`. Las URLs y metadatos se guardan en el documento MongoDB; las URLs pegadas se importan al mismo store antes de insertarse. Los módulos admiten una portada multimedia opcional. Configura `CONTENT_BLOB_READ_WRITE_TOKEN` únicamente en el entorno server-side de Next.js y del backend; nunca uses `NEXT_PUBLIC_` para este secreto.
 
 La foto de perfil se carga mediante `multipart/form-data` al BFF y el backend la almacena en Vercel Blob privado. El navegador nunca recibe el token de Blob; la imagen se sirve desde `/api/backend/auth/me/profile-photo` con la sesión autenticada.
 
