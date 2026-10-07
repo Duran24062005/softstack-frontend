@@ -1,0 +1,63 @@
+# Rediseño Campuslands × SoftStack
+
+## Problema y objetivo
+
+La experiencia anterior tenía estilos y patrones visuales dispersos entre la
+landing, autenticación, aprendizaje y CMS. El objetivo de este cambio es
+entregar una identidad unificada, reconocible y accesible para las rutas
+existentes, sin modificar contratos de negocio, rutas, datos ni permisos.
+
+## Alcance implementado
+
+- Sistema visual Campuslands con `#00AA80`, `#16697A`, `#0F084B`, blanco,
+  `#F4B422` y negro; fondos blancos como regla y Twilight para momentos de
+  énfasis.
+- Wordmark tipográfico Campuslands × SoftStack, navegación de aplicación con
+  estado activo y menú móvil, firma SVG de trayectoria y componentes de estado
+  reutilizables.
+- Landing, autenticación, dashboard, módulos, lecciones, perfil, biblioteca
+  administrativa, detalle de módulo y editor de lecciones.
+- Estados globales de carga, error y 404.
+- Reemplazo de los prompts del navegador por `UrlDialog`, que valida HTTP(S),
+  usa foco contenido, permite Escape y restaura el foco que inició la acción.
+
+## Actores y permisos
+
+Las rutas públicas continúan públicas. El dashboard requiere una sesión y las
+rutas bajo `/admin` continúan protegidas por `requireAdmin`. La navegación
+solamente expone los enlaces administrativos cuando el rol es `admin`; esto es
+una mejora de presentación, no reemplaza la autorización del servidor.
+
+## Contratos que se mantienen
+
+- Rutas, BFF, APIs FastAPI, sesión HttpOnly y redirecciones posteriores a
+  guardar contenido.
+- Progreso de lecciones y la persistencia real de módulos, lecciones y
+  documentos Tiptap.
+- Blob público para media educativa, Blob privado para foto de perfil y la
+  separación de sus permisos.
+- Poppins local ya integrada, sus tokens `--font-brand-body` y
+  `--font-brand-display`, y la posibilidad de sustituir solo display por Sugo
+  Classic en el futuro.
+
+## Decisiones de implementación
+
+Los elementos compartidos se concentran en `components/ui` y
+`components/navigation`. El shell de dashboard usa un límite `Suspense` para
+la navegación cliente que consume la ruta actual. Las páginas mantienen el
+fetch de servidor y los componentes cliente se limitan a interacción,
+formularios, editor y diálogos.
+
+La trayectoria es SVG y recibe el progreso existente; no crea ni modifica
+datos. Las animaciones respetan `prefers-reduced-motion`.
+
+## Validaciones y riesgos
+
+Se añadieron pruebas unitarias para reglas de navegación y validación de URLs,
+además de las pruebas de media existentes. Deben ejecutarse `pnpm test`,
+`pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm build` y `git diff --check` antes
+de desplegar.
+
+La revisión visual requiere una sesión válida y un navegador disponible para
+comprobar las rutas autenticadas en móvil y escritorio. No se deben usar datos
+de producción en pruebas de escritura sin autorización explícita.
