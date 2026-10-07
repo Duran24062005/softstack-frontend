@@ -1,4 +1,4 @@
-export type UserRole = "user" | "admin";
+export type UserRole = "user" | "trainer" | "admin";
 
 export type User = {
   id: string;
@@ -61,7 +61,83 @@ export type ProgressSummary = {
   completed_count: number;
   total_lessons: number;
   percentage: number;
+  completed_module_ids: string[];
+  completed_module_count: number;
+  total_modules: number;
+  module_percentage: number;
 };
+
+export type QuestionOption = { id: string; text: string };
+
+export type AssessmentQuestion = {
+  id: string;
+  prompt: string;
+  options: QuestionOption[];
+  competency: string;
+  difficulty: string;
+};
+
+export type Assessment = {
+  id: string;
+  target_type: "lesson" | "module";
+  target_id: string;
+  title: string;
+  status: "draft" | "published" | "archived";
+  question_count: number;
+  passing_score: number;
+  max_attempts: number;
+  approved_question_count: number;
+  attempts_used: number;
+  attempts_remaining: number;
+  passed: boolean;
+  locked: boolean;
+  lock_reason: string | null;
+  questions: AssessmentQuestion[];
+};
+
+export type Attempt = {
+  id: string;
+  assessment_id: string;
+  attempt_number: number;
+  cycle: number;
+  questions: AssessmentQuestion[];
+  attempts_remaining: number;
+};
+
+export type AttemptResult = {
+  id: string;
+  assessment_id: string;
+  attempt_number: number;
+  cycle: number;
+  score: number;
+  passed: boolean;
+  attempts_used: number;
+  attempts_remaining: number;
+  question_results: Array<{
+    question_id: string;
+    selected_option_id: string;
+    correct_option_id: string;
+    is_correct: boolean;
+    explanation: string;
+    competency: string;
+  }>;
+  lesson_completed: boolean;
+  module_completed: boolean;
+  submitted_at: string;
+};
+
+export type AssessmentAdminQuestion = AssessmentQuestion & {
+    assessment_id: string;
+    correct_option_id: string;
+    explanation: string;
+    status: "suggested" | "approved" | "archived";
+    source_provider: string | null;
+    source_model: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type AssessmentAdmin = Omit<Assessment, "questions"> & { questions: AssessmentAdminQuestion[] };
 
 export type ProfileUpdateRequest = {
   full_name?: string;

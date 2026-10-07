@@ -46,7 +46,7 @@ export function AppNavigation({ user }: { user: User }) {
           <span className="text-right">
             <span className="block text-xs font-semibold text-twilight">{user.full_name}</span>
             <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-teal">
-              {user.role === "admin" ? "Administrador" : "Estudiante"}
+              {user.role === "admin" ? "Administrador" : user.role === "trainer" ? "Trainer" : "Estudiante"}
             </span>
           </span>
           <Link href="/dashboard/profile" aria-label="Abrir mi perfil">
@@ -71,7 +71,7 @@ export function AppNavigation({ user }: { user: User }) {
             <ProfileAvatar user={user} className="size-12 text-sm" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-twilight">{user.full_name}</p>
-              <p className="text-xs text-teal">{user.role === "admin" ? "Administrador" : "Estudiante"}</p>
+              <p className="text-xs text-teal">{user.role === "admin" ? "Administrador" : user.role === "trainer" ? "Trainer" : "Estudiante"}</p>
             </div>
           </div>
           <nav className="mt-4 grid gap-1" aria-label="Navegación móvil">

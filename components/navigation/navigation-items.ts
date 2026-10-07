@@ -14,10 +14,17 @@ const learningItems: NavigationItem[] = [
 const adminItems: NavigationItem[] = [
   { href: "/admin/modules", label: "Módulos", section: "admin" },
   { href: "/admin/lessons/new", label: "Editor", section: "admin" },
+  { href: "/admin/analytics", label: "Resultados", section: "admin" },
+];
+
+const ownerItems: NavigationItem[] = [
+  { href: "/admin/settings", label: "Configuración", section: "admin" },
+  { href: "/admin/trainers", label: "Trainers", section: "admin" },
 ];
 
 export function getNavigationItems(role: UserRole): NavigationItem[] {
-  return role === "admin" ? [...learningItems, ...adminItems] : learningItems;
+  if (role === "admin") return [...learningItems, ...adminItems, ...ownerItems];
+  return role === "trainer" ? [...learningItems, ...adminItems] : learningItems;
 }
 
 export function isNavigationItemActive(pathname: string, href: string): boolean {

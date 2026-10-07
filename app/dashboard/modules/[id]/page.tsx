@@ -5,16 +5,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Reveal } from "@/components/motion/reveal";
-import { getLearningData, getModuleLessons, requireSession, serverFetch } from "@/lib/server-api";
+import { QuizPanel } from "@/components/dashboard/quiz-panel";
+import { getLearningData, getModuleAssessment, getModuleLessons, requireSession, serverFetch } from "@/lib/server-api";
 import type { Module } from "@/lib/types";
 
 export default async function ModulePage({ params }: { params: Promise<{ id: string }> }) {
   await requireSession();
   const { id } = await params;
-  const [moduleResponse, lessons, learning] = await Promise.all([
+  const [moduleResponse, lessons, learning, assessment] = await Promise.all([
     serverFetch<Module>(`/modules/${id}`),
     getModuleLessons(id),
     getLearningData(),
+    getModuleAssessment(id),
   ]);
   if (!moduleResponse.ok) notFound();
 
@@ -63,6 +65,7 @@ export default async function ModulePage({ params }: { params: Promise<{ id: str
           </div>
         )}
       </section>
+      <QuizPanel assessment={assessment} />
     </div>
   );
 }

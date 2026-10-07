@@ -2,16 +2,15 @@ import { ArrowLeft, CheckCircle, Clock } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { CompleteLesson } from "@/components/dashboard/complete-lesson";
 import { LessonContent } from "@/components/dashboard/lesson-content";
-import { getLearningData, getLesson, requireSession } from "@/lib/server-api";
+import { QuizPanel } from "@/components/dashboard/quiz-panel";
+import { getLesson, getLessonAssessment, requireSession } from "@/lib/server-api";
 
 export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSession();
   const { id } = await params;
-  const [lesson, learning] = await Promise.all([getLesson(id), getLearningData()]);
+  const [lesson, assessment] = await Promise.all([getLesson(id), getLessonAssessment(id)]);
   if (!lesson) notFound();
-  const completed = learning.progress.completed_lesson_ids.includes(lesson.id);
 
   return (
     <div className="app-main">
@@ -25,11 +24,11 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex flex-wrap gap-3 text-xs font-semibold">
             <span className="inline-flex items-center gap-2 rounded-lg bg-twilight/[.06] px-3 py-2 text-twilight/58"><Clock size={16} /> {lesson.estimated_minutes} min</span>
-            {completed ? <span className="inline-flex items-center gap-2 rounded-lg bg-seaweed/10 px-3 py-2 text-[#006c53]"><CheckCircle size={16} weight="fill" /> Completada</span> : null}
+            {assessment?.passed ? <span className="inline-flex items-center gap-2 rounded-lg bg-seaweed/10 px-3 py-2 text-[#006c53]"><CheckCircle size={16} weight="fill" /> Aprobada</span> : null}
           </div>
         </header>
         <article className="surface mt-8 p-3 sm:p-7 lg:p-10"><LessonContent content={lesson.content} /></article>
-        <div className="mt-8 flex justify-end"><CompleteLesson lessonId={lesson.id} completed={completed} /></div>
+        <QuizPanel assessment={assessment} />
       </div>
     </div>
   );
