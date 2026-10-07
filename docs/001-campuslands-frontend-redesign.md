@@ -12,9 +12,9 @@ existentes, sin modificar contratos de negocio, rutas, datos ni permisos.
 - Sistema visual Campuslands con `#00AA80`, `#16697A`, `#0F084B`, blanco,
   `#F4B422` y negro; fondos blancos como regla y Twilight para momentos de
   énfasis.
-- Wordmark tipográfico Campuslands × SoftStack, navegación de aplicación con
-  estado activo y menú móvil, firma SVG de trayectoria y componentes de estado
-  reutilizables.
+- Lockup Campuslands × SoftStack con los logos oficiales en PNG, navegación de
+  aplicación con estado activo y menú móvil, firma SVG de trayectoria y
+  componentes de estado reutilizables.
 - Landing, autenticación, dashboard, módulos, lecciones, perfil, biblioteca
   administrativa, detalle de módulo y editor de lecciones.
 - Estados globales de carga, error y 404.
@@ -50,6 +50,20 @@ formularios, editor y diálogos.
 
 La trayectoria es SVG y recibe el progreso existente; no crea ni modifica
 datos. Las animaciones respetan `prefers-reduced-motion`.
+
+## Uso de los logos oficiales
+
+`components/ui/campuslands-logo.tsx` centraliza la selección de assets para que
+las superficies claras y oscuras mantengan contraste y proporción:
+
+- `Campuslands_with_background_white.png`: logo a color para fondos claros.
+- `campuslands_logo_without_backgorund.png`: logo blanco transparente para el
+  panel oscuro de autenticación y otros fondos Twilight.
+
+Las variantes JPEG permanecen disponibles como recursos de marca, pero no se
+usan en el lockup principal porque tienen menor flexibilidad de composición o
+resolución para navegación y estados compartidos. El nombre `backgorund` del
+PNG blanco se conserva para no romper el asset entregado.
 
 ## Validaciones y riesgos
 
