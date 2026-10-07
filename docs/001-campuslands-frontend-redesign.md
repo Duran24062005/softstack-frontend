@@ -24,9 +24,10 @@ existentes, sin modificar contratos de negocio, rutas, datos ni permisos.
 ## Actores y permisos
 
 Las rutas públicas continúan públicas. El dashboard requiere una sesión y las
-rutas bajo `/admin` continúan protegidas por `requireAdmin`. La navegación
-solamente expone los enlaces administrativos cuando el rol es `admin`; esto es
-una mejora de presentación, no reemplaza la autorización del servidor.
+rutas bajo `/admin` protegidas por `requireEducator` permiten contenido a
+`admin` y `trainer`; configuración, trainers, asignaciones y reinicios siguen
+siendo exclusivos de `admin`. La navegación refleja esa separación, pero no
+reemplaza la autorización del servidor.
 
 ## Contratos que se mantienen
 
