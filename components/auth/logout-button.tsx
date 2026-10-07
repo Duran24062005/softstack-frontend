@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { apiFetch } from "@/lib/api";
 
-export function LogoutButton() {
+export function LogoutButton({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   async function logout() {
@@ -19,5 +19,5 @@ export function LogoutButton() {
       setLoading(false);
     }
   }
-  return <button type="button" onClick={logout} disabled={loading} className="flex items-center gap-2 text-sm text-ink/45 transition-colors hover:text-ink"><SignOut size={16} />{loading ? "Saliendo…" : "Cerrar sesión"}</button>;
+  return <button type="button" onClick={logout} disabled={loading} aria-label={compact ? "Cerrar sesión" : undefined} className="flex items-center gap-2 text-sm font-medium text-twilight/52 transition-colors hover:text-teal"><SignOut size={17} />{compact ? null : loading ? "Saliendo…" : "Cerrar sesión"}</button>;
 }
