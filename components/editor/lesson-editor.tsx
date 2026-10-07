@@ -9,6 +9,8 @@ import { apiFetch } from "@/lib/api";
 import { collectMediaPathnames, deleteContentMedia, getMediaKind, importContentMedia, uploadContentMedia } from "@/lib/content-media";
 import type { Lesson, MediaReference, Module, TiptapDocument } from "@/lib/types";
 import { createContentExtensions } from "@/components/editor/media-extensions";
+import { StatusNotice } from "@/components/ui/status-notice";
+import { UrlDialog } from "@/components/ui/url-dialog";
 
 type FloatingPosition = { top: number; left: number };
 type SelectionPosition = { from: number; to: number };
@@ -72,6 +74,7 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
   const [blockMenuOpen, setBlockMenuOpen] = useState(false);
   const [blockPosition, setBlockPosition] = useState<FloatingPosition>({ top: 30, left: 12 });
   const [inlinePosition, setInlinePosition] = useState<FloatingPosition | null>(null);
+  const [urlDialog, setUrlDialog] = useState<"link" | "media" | null>(null);
   const editor = useEditor({ extensions: createContentExtensions(), content: lesson?.content ?? { type: "doc", content: [] }, immediatelyRender: false });
 
   useEffect(() => {
@@ -111,8 +114,14 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
   }, [editor]);
 
   function addLink() {
-    const url = window.prompt("URL del enlace");
-    if (url) editor?.chain().focus().setLink({ href: url }).run();
+    if (!editor) return;
+    selectionRef.current = { from: editor.state.selection.from, to: editor.state.selection.to };
+    setUrlDialog("link");
+  }
+
+  function insertLink(url: string) {
+    if (!editor) return;
+    editor.chain().focus().setTextSelection(selectionRef.current).setLink({ href: url }).run();
   }
 
   const insertMedia = useCallback((reference: MediaReference) => {
@@ -140,13 +149,14 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
       insertMedia(reference);
       setMediaStatus("Medio importado a Blob.");
     } catch (caught) {
-      setMediaStatus(caught instanceof Error ? caught.message : "No pudimos importar el medio.");
+      const message = caught instanceof Error ? caught.message : "No pudimos importar el medio.";
+      setMediaStatus(message);
+      throw new Error(message);
     }
   }, [insertMedia]);
 
-  async function addMediaFromUrl() {
-    const url = window.prompt("URL de la imagen o video que quieres importar a Blob");
-    if (url) await importMediaFromUrl(url);
+  function addMediaFromUrl() {
+    setUrlDialog("media");
   }
 
   const handlePaste = useCallback((event: ClipboardEvent) => {
@@ -201,5 +211,5 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
     }
   }
 
-  return <div className="grid gap-7 lg:grid-cols-[0.8fr_1.2fr]"><div className="space-y-5"><label className="field field-dark"><span>Título</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej. Cómo escribir logros cuantificables" /></label><label className="field field-dark"><span>Descripción</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder="Qué aprenderá el estudiante…" /></label>{!lesson && <label className="field field-dark"><span>Módulo</span><select value={moduleId} onChange={(event) => setModuleId(event.target.value)}>{modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}</select></label>}<div className="grid gap-5 sm:grid-cols-2"><label className="field field-dark"><span>Estado</span><select value={status} onChange={(event) => setStatus(event.target.value as Lesson["status"])}><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></label><label className="field field-dark"><span>Minutos estimados</span><input value={minutes} onChange={(event) => setMinutes(event.target.value)} type="number" min={1} max={240} /></label></div><input ref={fileInputRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadFile(file); }} /><button type="button" onClick={save} disabled={saving} className="button button-ink button-large">{saving ? "Guardando…" : "Guardar lección"}</button>{mediaStatus && <p className="text-sm text-ink/55" role="status">{mediaStatus}</p>}{error && <p role="alert" className="text-sm text-red-700">{error}</p>}</div><div className="editor-frame"><div ref={canvasRef} className="editor-canvas">{editor && <div className="editor-block-controls" style={{ top: blockPosition.top, left: blockPosition.left }}><BlockFormatMenu editor={editor} open={blockMenuOpen} onToggle={() => setBlockMenuOpen((current) => !current)} onClose={() => setBlockMenuOpen(false)} onAddMedia={() => fileInputRef.current?.click()} /></div>}{editor && inlinePosition && <InlineSelectionMenu editor={editor} position={inlinePosition} onAddLink={addLink} />}<EditorContent editor={editor} /><div className="mt-3 px-5 pb-5 text-xs text-ink/45"><button type="button" className="underline underline-offset-2" onClick={() => void addMediaFromUrl()}>Importar medio desde una URL</button></div></div></div></div>;
+  return <><div className="grid gap-7 lg:grid-cols-[0.8fr_1.2fr]"><aside className="surface h-fit space-y-5 p-5 sm:p-6"><div><p className="eyebrow text-seaweed">Configuración</p><p className="mt-2 text-sm leading-6 text-twilight/55">Define el contexto antes de construir la experiencia de aprendizaje.</p></div><label className="field"><span>Título</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej. Cómo escribir logros cuantificables" /></label><label className="field"><span>Descripción</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder="Qué aprenderá el estudiante…" /></label>{!lesson && <label className="field"><span>Módulo</span><select value={moduleId} onChange={(event) => setModuleId(event.target.value)}>{modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}</select></label>}<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1"><label className="field"><span>Estado</span><select value={status} onChange={(event) => setStatus(event.target.value as Lesson["status"])}><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></label><label className="field"><span>Minutos estimados</span><input value={minutes} onChange={(event) => setMinutes(event.target.value)} type="number" min={1} max={240} /></label></div><input ref={fileInputRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadFile(file); }} /><button type="button" onClick={save} disabled={saving} className="button button-primary button-large w-full">{saving ? "Guardando…" : "Guardar lección"}</button>{mediaStatus ? <StatusNotice tone="info">{mediaStatus}</StatusNotice> : null}{error ? <StatusNotice tone="error">{error}</StatusNotice> : null}</aside><section className="editor-frame"><div className="flex items-center justify-between border-b border-twilight/10 px-5 py-4"><div><p className="eyebrow text-teal">Lienzo de lección</p><p className="mt-1 text-xs text-twilight/45">Selecciona texto para aplicar formato o enlazarlo.</p></div><button type="button" className="button button-secondary" onClick={() => setUrlDialog("media")}>Importar media</button></div><div ref={canvasRef} className="editor-canvas">{editor && <div className="editor-block-controls" style={{ top: blockPosition.top, left: blockPosition.left }}><BlockFormatMenu editor={editor} open={blockMenuOpen} onToggle={() => setBlockMenuOpen((current) => !current)} onClose={() => setBlockMenuOpen(false)} onAddMedia={() => fileInputRef.current?.click()} /></div>}{editor && inlinePosition && <InlineSelectionMenu editor={editor} position={inlinePosition} onAddLink={addLink} />}<EditorContent editor={editor} /><div className="px-5 pb-5 text-xs text-twilight/45"><button type="button" className="font-semibold text-teal underline underline-offset-2" onClick={addMediaFromUrl}>Importar medio desde una URL</button></div></div></section></div><UrlDialog open={urlDialog !== null} onClose={() => setUrlDialog(null)} onSubmit={urlDialog === "link" ? insertLink : importMediaFromUrl} title={urlDialog === "link" ? "Añadir enlace" : "Importar imagen o video"} description={urlDialog === "link" ? "Conecta el texto seleccionado con un recurso de confianza." : "Guardaremos una copia pública del recurso en el almacenamiento de contenido."} submitLabel={urlDialog === "link" ? "Añadir enlace" : "Importar recurso"} /></>;
 }
