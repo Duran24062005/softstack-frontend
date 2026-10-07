@@ -1,11 +1,35 @@
-import { UserCircle } from "@phosphor-icons/react/dist/ssr";
+import { LockKey, UserCircle } from "@phosphor-icons/react/dist/ssr";
 
-import { ProfileForm } from "@/components/dashboard/profile-form";
 import { ProfileAvatar } from "@/components/dashboard/profile-avatar";
+import { ProfileForm } from "@/components/dashboard/profile-form";
 import { ProfilePhotoForm } from "@/components/dashboard/profile-photo-form";
 import { requireSession } from "@/lib/server-api";
 
 export default async function ProfilePage() {
   const user = await requireSession();
-  return <div className="app-main"><div className="max-w-4xl"><p className="eyebrow text-cobalt">Cuenta / Perfil</p><div className="mt-5 flex items-end justify-between gap-6"><div><h1 className="display text-5xl tracking-[-.06em] sm:text-7xl">Tu perfil.</h1><p className="mt-5 max-w-xl leading-7 text-ink/60">Mantén tus datos listos para cada oportunidad.</p></div><ProfileAvatar user={user} className="hidden size-20 text-3xl sm:grid" /></div><div className="mt-14 rounded-[1.5rem] bg-white p-6 shadow-sm sm:p-9"><ProfilePhotoForm user={user} /><div className="mt-8"><ProfileForm user={user} /></div></div><div className="mt-8 flex items-center gap-2 text-sm text-ink/45"><UserCircle size={18} /> Tu email también identifica tu cuenta y no se comparte públicamente.</div></div></div>;
+
+  return (
+    <div className="app-main">
+      <div className="mx-auto max-w-5xl">
+        <header className="grid gap-6 border-b border-twilight/13 pb-9 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div>
+            <p className="eyebrow text-seaweed">Cuenta / Perfil</p>
+            <h1 className="display mt-4 text-5xl tracking-[-.055em] sm:text-7xl">Tu identidad, lista.</h1>
+            <p className="pretty-copy mt-5 max-w-xl leading-7 text-twilight/58">Mantén tus datos al día para moverte con confianza frente a cada oportunidad.</p>
+          </div>
+          <ProfileAvatar user={user} className="hidden size-24 text-3xl sm:grid" />
+        </header>
+        <div className="mt-8 grid gap-5 lg:grid-cols-[.72fr_1.28fr]">
+          <aside className="rounded-[1.35rem] bg-twilight p-7 text-white">
+            <p className="eyebrow text-gold">Privacidad primero</p>
+            <LockKey size={28} weight="bold" className="mt-10 text-seaweed" />
+            <h2 className="display mt-5 text-3xl tracking-[-.04em]">Tú controlas tus datos.</h2>
+            <p className="pretty-copy mt-4 text-sm leading-7 text-white/62">Tu foto de perfil es privada. Tu email identifica la cuenta y no se publica en el contenido educativo.</p>
+            <div className="mt-10 flex items-center gap-2 text-xs text-white/48"><UserCircle size={17} /> Cuenta {user.role === "admin" ? "administradora" : "estudiante"}</div>
+          </aside>
+          <section className="surface p-6 sm:p-9"><ProfilePhotoForm user={user} /><div className="mt-8"><ProfileForm user={user} /></div></section>
+        </div>
+      </div>
+    </div>
+  );
 }

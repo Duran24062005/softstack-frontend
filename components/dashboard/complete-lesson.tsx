@@ -13,5 +13,5 @@ export function CompleteLesson({ lessonId, completed }: { lessonId: string; comp
     setLoading(true);
     try { await apiFetch<ProgressSummary>(`/lessons/${lessonId}/complete`, { method: "POST" }); setDone(true); } finally { setLoading(false); }
   }
-  return <button onClick={complete} disabled={done || loading} className={`button button-large ${done ? "button-complete" : "button-lime"}`}>{loading ? <CircleNotch className="animate-spin" size={18} /> : <Check weight="bold" size={18} />}{done ? "Lección completada" : "Marcar como completada"}</button>;
+  return <button onClick={complete} disabled={done || loading} className={`button button-large ${done ? "button-complete" : "button-accent"}`}>{loading ? <CircleNotch className="animate-spin" size={18} /> : <Check weight="bold" size={18} />}{done ? "Lección completada" : "Marcar como completada"}</button>;
 }

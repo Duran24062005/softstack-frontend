@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowLeft, CheckCircle, Clock } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CompleteLesson } from "@/components/dashboard/complete-lesson";
@@ -12,5 +12,25 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
   const [lesson, learning] = await Promise.all([getLesson(id), getLearningData()]);
   if (!lesson) notFound();
   const completed = learning.progress.completed_lesson_ids.includes(lesson.id);
-  return <div className="app-main"><div className="mx-auto max-w-4xl"><Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-ink/50 transition-colors hover:text-ink"><ArrowLeft size={16} /> Volver a mi ruta</Link><div className="mt-12 border-b border-ink/15 pb-10"><p className="eyebrow text-cobalt">Lección / {lesson.order.toString().padStart(2, "0")}</p><h1 className="display mt-5 max-w-3xl text-5xl leading-[.95] tracking-[-.06em] sm:text-7xl">{lesson.title}</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-ink/60">{lesson.description}</p><div className="mt-7 flex flex-wrap items-center gap-5 text-sm text-ink/45"><span className="flex items-center gap-2"><Clock size={17} /> {lesson.estimated_minutes} min</span>{completed && <span className="flex items-center gap-2 font-semibold text-emerald-700"><CheckCircle size={17} weight="fill" /> Completada</span>}</div></div><article className="mt-10 rounded-[1.5rem] bg-white p-5 shadow-sm sm:p-10"><LessonContent content={lesson.content} /></article><div className="mt-8 flex justify-end"><CompleteLesson lessonId={lesson.id} completed={completed} /></div></div></div>;
+
+  return (
+    <div className="app-main">
+      <div className="mx-auto max-w-5xl">
+        <Link href={`/dashboard/modules/${lesson.module_id}`} className="back-link"><ArrowLeft size={16} /> Volver al módulo</Link>
+        <header className="mt-8 grid gap-8 border-b border-twilight/13 pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <p className="eyebrow text-seaweed">Lección / {lesson.order.toString().padStart(2, "0")}</p>
+            <h1 className="display mt-5 max-w-4xl text-5xl leading-[.96] tracking-[-.055em] sm:text-7xl">{lesson.title}</h1>
+            <p className="pretty-copy mt-6 max-w-2xl text-base leading-8 text-twilight/60">{lesson.description}</p>
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs font-semibold">
+            <span className="inline-flex items-center gap-2 rounded-lg bg-twilight/[.06] px-3 py-2 text-twilight/58"><Clock size={16} /> {lesson.estimated_minutes} min</span>
+            {completed ? <span className="inline-flex items-center gap-2 rounded-lg bg-seaweed/10 px-3 py-2 text-[#006c53]"><CheckCircle size={16} weight="fill" /> Completada</span> : null}
+          </div>
+        </header>
+        <article className="surface mt-8 p-3 sm:p-7 lg:p-10"><LessonContent content={lesson.content} /></article>
+        <div className="mt-8 flex justify-end"><CompleteLesson lessonId={lesson.id} completed={completed} /></div>
+      </div>
+    </div>
+  );
 }

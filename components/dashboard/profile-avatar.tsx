@@ -10,7 +10,7 @@ export function ProfileAvatar({ user, className = "" }: { user: Pick<User, "full
   const initial = user.full_name.slice(0, 1).toUpperCase();
 
   return (
-    <span className={`grid place-items-center overflow-hidden rounded-full bg-ink font-bold text-lime ${className}`}>
+    <span className={`grid place-items-center overflow-hidden rounded-[32%] bg-twilight font-bold text-gold ${className}`}>
       {showImage ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
