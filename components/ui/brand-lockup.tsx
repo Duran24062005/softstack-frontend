@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { CampuslandsLogo } from "@/components/ui/campuslands-logo";
+
 type BrandLockupProps = {
   tone?: "light" | "dark";
   compact?: boolean;
@@ -19,13 +21,13 @@ export function BrandLockup({
     <Link
       href={href}
       aria-label="Campuslands SoftStack, ir al inicio"
-      className={`brand-lockup ${onDark ? "brand-lockup-light" : "brand-lockup-dark"} ${className}`}
+      className={`brand-lockup ${compact ? "brand-lockup-compact" : ""} ${onDark ? "brand-lockup-light" : "brand-lockup-dark"} ${className}`}
     >
-      <span className="brand-lockup-name">Campuslands</span>
-      <span className="brand-lockup-product">SoftStack / Tech Leap</span>
-      {compact ? null : (
-        <span className="brand-lockup-tagline">Talento · Tecnología · Impacto</span>
-      )}
+      <CampuslandsLogo tone={onDark ? "light" : "dark"} compact={compact} />
+      <span className="brand-lockup-copy">
+        <span className="brand-lockup-product">SoftStack / Tech Leap</span>
+        {compact ? null : <span className="brand-lockup-tagline">Talento · Tecnología · Impacto</span>}
+      </span>
     </Link>
   );
 }

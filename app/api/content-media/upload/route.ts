@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const sessionResponse = await serverFetch<{ role?: string; id?: string }>("/auth/me");
   if (!sessionResponse.ok) return NextResponse.json({ detail: "La sesión administrativa es necesaria." }, { status: 401 });
   const session = await sessionResponse.json();
-  if (session.role !== "admin") return NextResponse.json({ detail: "Solo los administradores pueden cargar medios." }, { status: 403 });
+  if (session.role !== "admin" && session.role !== "trainer") return NextResponse.json({ detail: "Solo los educadores pueden cargar medios." }, { status: 403 });
   if (!process.env.CONTENT_BLOB_READ_WRITE_TOKEN) return NextResponse.json({ detail: "El almacenamiento de contenido no está configurado." }, { status: 503 });
 
   try {
