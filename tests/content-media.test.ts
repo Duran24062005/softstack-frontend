@@ -10,6 +10,7 @@ vi.mock("@/lib/api", () => ({ apiFetch: apiFetchMock }));
 
 import {
   collectMediaPathnames,
+  deleteContentMedia,
   getMediaKind,
   importContentMedia,
   uploadContentMedia,
@@ -71,6 +72,17 @@ describe("content media helpers", () => {
       method: "POST",
       body: JSON.stringify({ source_url: "https://example.com/image.png", kind: "image" }),
     }));
+  });
+
+  it("deletes media by pathname through the backend", async () => {
+    apiFetchMock.mockResolvedValue(undefined);
+
+    await deleteContentMedia({ pathname: imageReference.pathname });
+
+    expect(apiFetchMock).toHaveBeenCalledWith("/admin/content-media", {
+      method: "DELETE",
+      body: JSON.stringify({ pathname: imageReference.pathname }),
+    });
   });
 
   it("collects image and video pathnames recursively from nested Tiptap nodes", () => {
