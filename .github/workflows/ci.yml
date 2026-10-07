@@ -38,5 +38,11 @@ jobs:
       - name: Run lint
         run: pnpm lint
 
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: Check TypeScript
+        run: pnpm exec tsc --noEmit
+
       - name: Build application
         run: pnpm build
