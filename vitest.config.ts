@@ -21,8 +21,11 @@ export default defineConfig({
         "components/admin/assessment-settings-form.tsx",
         "components/admin/trainer-assignment-form.tsx",
         "components/admin/trainer-management-form.tsx",
+        "components/admin/user-management.tsx",
         "components/admin/reset-attempts-button.tsx",
         "components/navigation/navigation-items.ts",
+        "components/navigation/app-navigation.tsx",
+        "components/navigation/dashboard-shell.tsx",
         "app/api/backend/[...path]/route.ts",
       ],
       thresholds: {

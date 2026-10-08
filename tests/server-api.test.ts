@@ -15,6 +15,7 @@ import {
   getAdminModules,
   getAdminStudents,
   getAdminTrainers,
+  getAdminUsers,
   getAnalyticsOverview,
   getAnalyticsStudents,
   getAssessmentSettings,
@@ -165,6 +166,16 @@ describe("server API helpers", () => {
     await expect(getAssessmentSettings()).resolves.toEqual({ passing_score: 90, max_attempts: 3, default_question_count: 4 });
     await expect(getAdminStudents()).resolves.toEqual([]);
     await expect(getAdminTrainers()).resolves.toEqual([{ id: "trainer-1" }]);
+  });
+
+  it("loads all admin users with optional role and status filters", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", role: "user", account_status: "pending" }]), { status: 200 }));
+
+    await expect(getAdminUsers({ role: "user", account_status: "pending" })).resolves.toEqual([{ id: "user-1", role: "user", account_status: "pending" }]);
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/admin/users?role=user&account_status=pending", {
+      cache: "no-store",
+      headers: { Cookie: "session=abc" },
+    });
   });
 
   it("combines learning data and uses empty fallbacks for failed responses", async () => {
