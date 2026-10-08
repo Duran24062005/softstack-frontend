@@ -7,7 +7,10 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { addSeriesMock, chartMock, createChartMock, areaSeries, lineSeries, histogramSeries } = vi.hoisted(() => {
-  const addSeries = vi.fn(() => ({ setData: vi.fn() }));
+  const addSeries = vi.fn((definition: unknown) => {
+    void definition;
+    return { setData: vi.fn() };
+  });
   const chart = {
     addSeries,
     timeScale: vi.fn(() => ({ fitContent: vi.fn() })),
