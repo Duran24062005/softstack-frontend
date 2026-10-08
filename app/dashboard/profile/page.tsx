@@ -14,7 +14,7 @@ export default async function ProfilePage() {
         <header className="grid gap-6 border-b border-twilight/13 pb-9 sm:grid-cols-[1fr_auto] sm:items-end">
           <div>
             <p className="eyebrow text-seaweed">Cuenta / Perfil</p>
-            <h1 className="display mt-4 text-5xl tracking-[-.055em] sm:text-7xl">Tu identidad, lista.</h1>
+            <h1 className="display mt-4 text-4xl tracking-[-.055em] sm:text-6xl lg:text-7xl">Tu identidad, lista.</h1>
             <p className="pretty-copy mt-5 max-w-xl leading-7 text-twilight/58">Mantén tus datos al día para moverte con confianza frente a cada oportunidad.</p>
           </div>
           <ProfileAvatar user={user} className="hidden size-24 text-3xl sm:grid" />

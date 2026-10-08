@@ -31,7 +31,7 @@ export default async function ModulePage({ params }: { params: Promise<{ id: str
       <section className="mt-8 grid overflow-hidden rounded-[1.5rem] border border-twilight/10 bg-white lg:grid-cols-[1.1fr_.9fr]">
         <Reveal className="p-7 sm:p-10 lg:p-12">
           <p className="eyebrow text-seaweed">Módulo / {learningModule.order.toString().padStart(2, "0")}</p>
-          <h1 className="display mt-5 max-w-4xl text-5xl leading-[.96] tracking-[-.055em] sm:text-7xl">{learningModule.title}</h1>
+          <h1 className="display mt-5 max-w-4xl text-4xl leading-[1.02] tracking-[-.055em] sm:text-6xl lg:text-7xl">{learningModule.title}</h1>
           <p className="pretty-copy mt-6 max-w-2xl text-base leading-8 text-twilight/60">{learningModule.description}</p>
           <div className="mt-9 flex items-center gap-4">
             <span className="metric-number text-4xl font-bold text-teal">{moduleProgress}%</span>

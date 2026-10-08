@@ -19,7 +19,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
         <header className="mt-8 grid gap-8 border-b border-twilight/13 pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="eyebrow text-seaweed">Lección / {lesson.order.toString().padStart(2, "0")}</p>
-            <h1 className="display mt-5 max-w-4xl text-5xl leading-[.96] tracking-[-.055em] sm:text-7xl">{lesson.title}</h1>
+            <h1 className="display mt-5 max-w-4xl text-4xl leading-[1.02] tracking-[-.055em] sm:text-6xl lg:text-7xl">{lesson.title}</h1>
             <p className="pretty-copy mt-6 max-w-2xl text-base leading-8 text-twilight/60">{lesson.description}</p>
           </div>
           <div className="flex flex-wrap gap-3 text-xs font-semibold">

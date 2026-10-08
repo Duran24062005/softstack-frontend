@@ -18,7 +18,7 @@ export default async function DashboardPage() {
         <Reveal className="flex flex-col justify-between p-7 sm:p-10 lg:min-h-[32rem] lg:p-12">
           <div>
             <p className="eyebrow text-gold">Mi espacio / Próximo nivel</p>
-            <h1 className="display mt-6 max-w-3xl text-5xl leading-[.96] tracking-[-.055em] sm:text-7xl">
+            <h1 className="display mt-6 max-w-3xl text-4xl leading-[1.02] tracking-[-.055em] sm:text-6xl lg:text-7xl">
               Hola, {user.full_name.split(" ")[0]}. Tu talento está en <span className="text-gold">movimiento.</span>
             </h1>
             <p className="pretty-copy mt-6 max-w-xl leading-7 text-white/68">

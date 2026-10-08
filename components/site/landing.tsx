@@ -69,7 +69,7 @@ export function Landing() {
               transition={{ duration: .75, ease: [0.22, 1, 0.36, 1] }}
             >
               <p className="eyebrow text-seaweed">Campus / Talento</p>
-              <h1 className="display mt-6 max-w-4xl text-5xl leading-[.97] tracking-[-.06em] sm:text-6xl lg:text-[5.7rem]">
+              <h1 className="display mt-6 max-w-4xl text-4xl leading-[1.02] tracking-[-.06em] sm:text-6xl lg:text-[5.7rem]">
                 Tu talento ya existe. Haz que el mercado pueda <span className="text-seaweed">verlo.</span>
               </h1>
               <p className="pretty-copy mt-7 max-w-[38rem] text-lg leading-8 text-twilight/62">
