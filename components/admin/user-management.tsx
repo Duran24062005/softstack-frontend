@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowCounterClockwise, Check, CircleNotch, MagnifyingGlass, Pause, X } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { StatusNotice } from "@/components/ui/status-notice";
@@ -146,6 +147,7 @@ export function UserManagement({ initialUsers }: { initialUsers: AdminUser[] }) 
                   <td className="px-5 py-4 align-top">
                     {user.role === "admin" ? <span className="text-xs font-semibold text-twilight/45">Cuenta protegida</span> : (
                       <div className="flex flex-wrap gap-2">
+                        {user.role === "user" ? <Link href={`/admin/users/${user.id}/academic-profile`} className="button button-quiet">Perfil académico</Link> : null}
                         {user.account_status === "pending" ? <>
                           <button type="button" className="button button-quiet" disabled={busyUserId !== ""} onClick={() => changeStatus(user, "active")}><Check size={15} />Aprobar</button>
                           <button type="button" className="button button-quiet text-danger" disabled={busyUserId !== ""} onClick={() => changeStatus(user, "rejected")}><X size={15} />Rechazar</button>

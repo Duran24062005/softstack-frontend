@@ -3,10 +3,12 @@ import { LockKey, UserCircle } from "@phosphor-icons/react/dist/ssr";
 import { ProfileAvatar } from "@/components/dashboard/profile-avatar";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { ProfilePhotoForm } from "@/components/dashboard/profile-photo-form";
-import { requireSession } from "@/lib/server-api";
+import { AcademicProfileForm } from "@/components/dashboard/academic-profile-form";
+import { getMyAcademicProfile, requireSession } from "@/lib/server-api";
 
 export default async function ProfilePage() {
   const user = await requireSession();
+  const academicProfile = user.role === "user" ? await getMyAcademicProfile() : null;
 
   return (
     <div className="app-main">
@@ -27,7 +29,11 @@ export default async function ProfilePage() {
             <p className="pretty-copy mt-4 text-sm leading-7 text-white/62">Tu foto de perfil es privada. Tu email identifica la cuenta y no se publica en el contenido educativo.</p>
             <div className="mt-10 flex items-center gap-2 text-xs text-white/48"><UserCircle size={17} /> Cuenta {user.role === "admin" ? "administradora" : "estudiante"}</div>
           </aside>
-          <section className="surface p-6 sm:p-9"><ProfilePhotoForm user={user} /><div className="mt-8"><ProfileForm user={user} /></div></section>
+          <section className="surface p-6 sm:p-9">
+            <ProfilePhotoForm user={user} />
+            <div className="mt-8"><ProfileForm user={user} /></div>
+            {user.role === "user" ? <AcademicProfileForm endpoint="/auth/me/academic-profile" initialProfile={academicProfile} /> : null}
+          </section>
         </div>
       </div>
     </div>
