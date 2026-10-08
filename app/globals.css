@@ -560,6 +560,15 @@ select:focus-visible {
   border-color: var(--analytics-chart-data-row);
 }
 
+.analytics-chart-attribution {
+  color: var(--analytics-chart-empty);
+}
+
+.analytics-chart-attribution a {
+  color: var(--analytics-chart-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 @media (prefers-color-scheme: dark) {
   .analytics-chart-surface {

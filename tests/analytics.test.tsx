@@ -69,12 +69,13 @@ describe("analytics chart", () => {
 
     expect(createChartMock).toHaveBeenCalledWith(expect.any(HTMLDivElement), expect.objectContaining({
       autoSize: true,
-      layout: expect.objectContaining({ background: { color: "#F7F9F9" } }),
+      layout: expect.objectContaining({ background: { color: "#F7F9F9" }, attributionLogo: false }),
     }));
     expect(addSeriesMock).toHaveBeenCalledTimes(3);
     expect(addSeriesMock.mock.calls.map(([definition]) => definition)).toEqual([areaSeries, lineSeries, histogramSeries]);
     expect(screen.getByRole("img", { name: "Avance del estudiante" })).toBeInTheDocument();
     expect(screen.getByText("Ver datos")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "TradingView" })).toHaveAttribute("href", "https://www.tradingview.com/");
 
     unmount();
     expect(chartMock.remove).toHaveBeenCalledOnce();
@@ -94,7 +95,7 @@ describe("analytics chart", () => {
     render(<AnalyticsChart ariaLabel="Avance" series={[{ id: "progress", label: "Avance", color: "#00AA80", kind: "area", data: [{ time: "2026-10-08", value: 50 }] }]} />);
 
     expect(createChartMock).toHaveBeenCalledWith(expect.any(HTMLDivElement), expect.objectContaining({
-      layout: expect.objectContaining({ background: { color: "#0F084B" } }),
+      layout: expect.objectContaining({ background: { color: "#0F084B" }, attributionLogo: false }),
     }));
 
     colorSchemeListener?.({ matches: false } as MediaQueryListEvent);

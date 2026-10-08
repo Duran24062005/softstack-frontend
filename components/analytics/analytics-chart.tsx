@@ -57,6 +57,7 @@ function getChartOptions(theme: ChartTheme, format: "integer" | "percent") {
       textColor: theme.text,
       fontFamily: "Poppins, Arial, sans-serif",
       fontSize: 11,
+      attributionLogo: false,
     },
     grid: {
       vertLines: { color: theme.grid },
@@ -138,6 +139,7 @@ export function AnalyticsChart({ ariaLabel, series, format = "integer" }: Analyt
           </div>
         </details>
       ) : null}
+      {hasData ? <p className="analytics-chart-attribution mt-3 text-right text-[10px]">Gráficas con <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer noopener">TradingView</a></p> : null}
     </div>
   );
 }
