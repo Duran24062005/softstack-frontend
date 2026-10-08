@@ -111,7 +111,7 @@ export function AppNavigation({
               title={collapsed ? "Expandir menú" : "Encoger menú"}
               onClick={onToggle}
             >
-              {collapsed ? <CaretLeft size={18} weight="bold" /> : <CaretRight size={18} weight="bold" />}
+              {collapsed ? <CaretRight size={18} weight="bold" /> : <CaretLeft size={18} weight="bold" />}
             </button>
           </div>
 

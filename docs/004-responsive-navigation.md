@@ -5,10 +5,10 @@
 La navegación autenticada se mantiene disponible tanto en dashboard como en
 administración, pero cambia de presentación según el viewport:
 
-- `lg` y superiores (`1024px`): sidebar fijo a la derecha.
+- `lg` y superiores (`1024px`): sidebar fijo a la izquierda.
 - Sidebar expandido: `18rem` aproximadamente.
 - Sidebar colapsado: `5.75rem`, con iconos y títulos accesibles.
-- Menor a `1024px`: barra superior compacta y drawer desde la derecha.
+- Menor a `1024px`: barra superior compacta y drawer desde la izquierda.
 
 ## Interacción y accesibilidad
 
@@ -20,7 +20,7 @@ lo abrió al cerrarlo.
 
 ## Responsividad de superficies
 
-El contenido y footer reservan espacio a la derecha únicamente cuando existe
+El contenido y footer reservan espacio a la izquierda únicamente cuando existe
 el sidebar permanente. En móvil no se reserva espacio lateral. Encabezados,
 formularios, grids, botones y media se apilan o reducen escala; las tablas
 anchas conservan scroll dentro de su propio contenedor para evitar overflow de

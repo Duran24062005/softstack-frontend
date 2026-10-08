@@ -83,7 +83,7 @@ describe("AppNavigation", () => {
     expect(within(navigation).getByRole("link", { name: "Usuarios" })).toHaveAttribute("title", "Usuarios");
   });
 
-  it("opens the right drawer, locks scroll and closes with Escape or route selection", async () => {
+  it("opens the left drawer, locks scroll and closes with Escape or route selection", async () => {
     const userEvents = userEvent.setup();
     render(<AppNavigation user={userWithRole("user")} collapsed={false} onToggle={vi.fn()} />);
     const openButton = screen.getByRole("button", { name: "Abrir navegación" });

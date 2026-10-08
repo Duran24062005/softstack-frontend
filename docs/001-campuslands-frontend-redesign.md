@@ -13,7 +13,7 @@ existentes, sin modificar contratos de negocio, rutas, datos ni permisos.
   `#F4B422` y negro; fondos blancos como regla y Twilight para momentos de
   énfasis.
 - Lockup Campuslands × SoftStack con los logos oficiales en PNG, navegación de
-  aplicación lateral derecha colapsable en escritorio y drawer móvil, firma
+  aplicación lateral izquierda colapsable en escritorio y drawer móvil, firma
   SVG de trayectoria y componentes de estado reutilizables.
 - Landing, autenticación, dashboard, módulos, lecciones, perfil, biblioteca
   administrativa, detalle de módulo y editor de lecciones.
@@ -46,9 +46,9 @@ reemplaza la autorización del servidor.
 Los elementos compartidos se concentran en `components/ui` y
 `components/navigation`. Los shells de dashboard y administración usan un
 límite `Suspense` para la navegación cliente que consume la ruta actual. En
-escritorio, la navegación vive en un sidebar fijo a la derecha cuyo ancho se
+escritorio, la navegación vive en un sidebar fijo a la izquierda cuyo ancho se
 reduce a modo iconos; en móvil conserva una barra superior que abre un drawer
-desde la derecha con overlay, cierre por Escape y bloqueo temporal del scroll.
+desde la izquierda con overlay, cierre por Escape y bloqueo temporal del scroll.
 Las páginas mantienen el fetch de servidor y los componentes cliente se
 limitan a interacción, formularios, editor y diálogos.
 
