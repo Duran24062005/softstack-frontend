@@ -39,6 +39,7 @@ El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de ses
 - `/dashboard/modules/:id` y `/dashboard/lessons/:id` — consumo de contenido.
 - `/admin/modules`, `/admin/modules/new` y `/admin/modules/:id` — catálogo, creación de módulos y listado de lecciones del módulo.
 - `/admin/lessons/new` — editor Tiptap para administradores.
+- `/admin/users` — revisión de registros, roles y estados de cuenta para administradores.
 
 La interfaz usa Tailwind v4, `motion/react` para animaciones accesibles y Tiptap para documentos estructurados.
 

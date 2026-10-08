@@ -13,8 +13,8 @@ existentes, sin modificar contratos de negocio, rutas, datos ni permisos.
   `#F4B422` y negro; fondos blancos como regla y Twilight para momentos de
   énfasis.
 - Lockup Campuslands × SoftStack con los logos oficiales en PNG, navegación de
-  aplicación con estado activo y menú móvil, firma SVG de trayectoria y
-  componentes de estado reutilizables.
+  aplicación lateral derecha colapsable en escritorio y drawer móvil, firma
+  SVG de trayectoria y componentes de estado reutilizables.
 - Landing, autenticación, dashboard, módulos, lecciones, perfil, biblioteca
   administrativa, detalle de módulo y editor de lecciones.
 - Estados globales de carga, error y 404.
@@ -44,10 +44,18 @@ reemplaza la autorización del servidor.
 ## Decisiones de implementación
 
 Los elementos compartidos se concentran en `components/ui` y
-`components/navigation`. El shell de dashboard usa un límite `Suspense` para
-la navegación cliente que consume la ruta actual. Las páginas mantienen el
-fetch de servidor y los componentes cliente se limitan a interacción,
-formularios, editor y diálogos.
+`components/navigation`. Los shells de dashboard y administración usan un
+límite `Suspense` para la navegación cliente que consume la ruta actual. En
+escritorio, la navegación vive en un sidebar fijo a la derecha cuyo ancho se
+reduce a modo iconos; en móvil conserva una barra superior que abre un drawer
+desde la derecha con overlay, cierre por Escape y bloqueo temporal del scroll.
+Las páginas mantienen el fetch de servidor y los componentes cliente se
+limitan a interacción, formularios, editor y diálogos.
+
+El layout responsive usa `lg` como punto de cambio para el sidebar permanente.
+Debajo de `1024px`, el contenido ocupa todo el ancho y la navegación se abre
+como panel superpuesto. Las tablas largas usan scroll interno y los encabezados,
+formularios, grids y botones reducen su escala o apilan sus columnas en móvil.
 
 La trayectoria es SVG y recibe el progreso existente; no crea ni modifica
 datos. Las animaciones respetan `prefers-reduced-motion`.
