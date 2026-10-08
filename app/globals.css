@@ -520,23 +520,32 @@ select:focus-visible {
   animation: draw-trajectory 1.25s cubic-bezier(.22, 1, .36, 1) both;
 }
 
+.analytics-chart-surface {
+  --analytics-chart-background: #f7f9f9;
+  --analytics-chart-border: rgba(15, 8, 75, .13);
+  --analytics-chart-text: rgba(15, 8, 75, .68);
+  --analytics-chart-empty: rgba(15, 8, 75, .58);
+  --analytics-chart-data-rule: rgba(15, 8, 75, .13);
+  --analytics-chart-data-row: rgba(15, 8, 75, .08);
+}
+
 .analytics-chart {
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .13);
+  border: 1px solid var(--analytics-chart-border);
   border-radius: 1rem;
-  background: var(--twilight);
-  color: rgba(255, 255, 255, .72);
+  background: var(--analytics-chart-background);
+  color: var(--analytics-chart-text);
   padding: .5rem;
 }
 
 .analytics-chart-empty {
-  color: rgba(255, 255, 255, .64);
+  color: var(--analytics-chart-empty);
 }
 
 .analytics-chart-data {
-  border-color: rgba(15, 8, 75, .13);
-  background: var(--twilight);
-  color: rgba(255, 255, 255, .7);
+  border-color: var(--analytics-chart-border);
+  background: var(--analytics-chart-background);
+  color: var(--analytics-chart-text);
 }
 
 .analytics-chart-data-summary {
@@ -544,11 +553,23 @@ select:focus-visible {
 }
 
 .analytics-chart-data-rule {
-  border-color: rgba(255, 255, 255, .16);
+  border-color: var(--analytics-chart-data-rule);
 }
 
 .analytics-chart-data-row {
-  border-color: rgba(255, 255, 255, .08);
+  border-color: var(--analytics-chart-data-row);
+}
+
+
+@media (prefers-color-scheme: dark) {
+  .analytics-chart-surface {
+    --analytics-chart-background: #0f084b;
+    --analytics-chart-border: rgba(255, 255, 255, .13);
+    --analytics-chart-text: rgba(255, 255, 255, .72);
+    --analytics-chart-empty: rgba(255, 255, 255, .64);
+    --analytics-chart-data-rule: rgba(255, 255, 255, .16);
+    --analytics-chart-data-row: rgba(255, 255, 255, .08);
+  }
 }
 
 @keyframes draw-trajectory {

@@ -25,15 +25,57 @@ function formatValue(value: number, format: "integer" | "percent") {
   return format === "percent" ? `${value.toLocaleString("es-CO", { maximumFractionDigits: 1 })}%` : value.toLocaleString("es-CO", { maximumFractionDigits: 1 });
 }
 
-const chartTheme = {
-  background: "#0F084B",
-  text: "rgba(255, 255, 255, .72)",
-  grid: "rgba(255, 255, 255, .08)",
-  gridStrong: "rgba(255, 255, 255, .13)",
-  border: "rgba(255, 255, 255, .18)",
-  crosshair: "rgba(244, 180, 34, .72)",
-  crosshairSecondary: "rgba(244, 180, 34, .4)",
+const chartThemes = {
+  light: {
+    background: "#F7F9F9",
+    text: "rgba(15, 8, 75, .68)",
+    grid: "rgba(15, 8, 75, .08)",
+    gridStrong: "rgba(15, 8, 75, .13)",
+    border: "rgba(15, 8, 75, .18)",
+    crosshair: "rgba(22, 105, 122, .8)",
+    crosshairSecondary: "rgba(22, 105, 122, .45)",
+  },
+  dark: {
+    background: "#0F084B",
+    text: "rgba(255, 255, 255, .72)",
+    grid: "rgba(255, 255, 255, .08)",
+    gridStrong: "rgba(255, 255, 255, .13)",
+    border: "rgba(255, 255, 255, .18)",
+    crosshair: "rgba(244, 180, 34, .72)",
+    crosshairSecondary: "rgba(244, 180, 34, .4)",
+  },
 } as const;
+
+type ChartTheme = (typeof chartThemes)[keyof typeof chartThemes];
+
+function getChartOptions(theme: ChartTheme, format: "integer" | "percent") {
+  return {
+    autoSize: true,
+    height: 240,
+    layout: {
+      background: { color: theme.background },
+      textColor: theme.text,
+      fontFamily: "Poppins, Arial, sans-serif",
+      fontSize: 11,
+    },
+    grid: {
+      vertLines: { color: theme.grid },
+      horzLines: { color: theme.gridStrong },
+    },
+    crosshair: {
+      vertLine: { color: theme.crosshair, width: 1 as const },
+      horzLine: { color: theme.crosshairSecondary, width: 1 as const },
+    },
+    rightPriceScale: { borderColor: theme.border },
+    timeScale: { borderColor: theme.border, timeVisible: false, rightOffset: 2 },
+    localization: { priceFormatter: (value: number) => formatValue(value, format) },
+  };
+}
+
+function getColorSchemeMediaQuery() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+  return window.matchMedia("(prefers-color-scheme: dark)");
+}
 
 export function AnalyticsChart({ ariaLabel, series, format = "integer" }: AnalyticsChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -44,27 +86,8 @@ export function AnalyticsChart({ ariaLabel, series, format = "integer" }: Analyt
     const container = chartContainerRef.current;
     if (!container || !hasData) return undefined;
 
-    const chart = createChart(container, {
-      autoSize: true,
-      height: 240,
-      layout: {
-        background: { color: chartTheme.background },
-        textColor: chartTheme.text,
-        fontFamily: "Poppins, Arial, sans-serif",
-        fontSize: 11,
-      },
-      grid: {
-        vertLines: { color: chartTheme.grid },
-        horzLines: { color: chartTheme.gridStrong },
-      },
-      crosshair: {
-        vertLine: { color: chartTheme.crosshair, width: 1 },
-        horzLine: { color: chartTheme.crosshairSecondary, width: 1 },
-      },
-      rightPriceScale: { borderColor: chartTheme.border },
-      timeScale: { borderColor: chartTheme.border, timeVisible: false, rightOffset: 2 },
-      localization: { priceFormatter: (value: number) => formatValue(value, format) },
-    });
+    const colorSchemeMediaQuery = getColorSchemeMediaQuery();
+    const chart = createChart(container, getChartOptions(colorSchemeMediaQuery?.matches ? chartThemes.dark : chartThemes.light, format));
 
     for (const item of series) {
       const points = item.data.map((point) => ({ time: point.time as Time, value: point.value }));
@@ -86,12 +109,20 @@ export function AnalyticsChart({ ariaLabel, series, format = "integer" }: Analyt
       }
     }
 
+    const handleColorSchemeChange = (event: MediaQueryListEvent) => {
+      chart.applyOptions(getChartOptions(event.matches ? chartThemes.dark : chartThemes.light, format));
+    };
+
+    colorSchemeMediaQuery?.addEventListener("change", handleColorSchemeChange);
     chart.timeScale().fitContent();
-    return () => chart.remove();
+    return () => {
+      colorSchemeMediaQuery?.removeEventListener("change", handleColorSchemeChange);
+      chart.remove();
+    };
   }, [format, hasData, series]);
 
   return (
-    <>
+    <div className="analytics-chart-surface">
       <div className="analytics-chart" role="img" aria-label={ariaLabel}>
         {hasData ? <div ref={chartContainerRef} className="h-60 w-full" /> : <p className="analytics-chart-empty flex h-60 items-center justify-center px-5 text-center text-sm">Todavía no hay datos para este período.</p>}
       </div>
@@ -107,6 +138,6 @@ export function AnalyticsChart({ ariaLabel, series, format = "integer" }: Analyt
           </div>
         </details>
       ) : null}
-    </>
+    </div>
   );
 }

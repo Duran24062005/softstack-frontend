@@ -6,18 +6,21 @@ import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { addSeriesMock, chartMock, createChartMock, areaSeries, lineSeries, histogramSeries } = vi.hoisted(() => {
+const { addSeriesMock, applyOptionsMock, chartMock, createChartMock, areaSeries, lineSeries, histogramSeries } = vi.hoisted(() => {
   const addSeries = vi.fn((definition: unknown) => {
     void definition;
     return { setData: vi.fn() };
   });
+  const applyOptions = vi.fn();
   const chart = {
     addSeries,
+    applyOptions,
     timeScale: vi.fn(() => ({ fitContent: vi.fn() })),
     remove: vi.fn(),
   };
   return {
     addSeriesMock: addSeries,
+    applyOptionsMock: applyOptions,
     chartMock: chart,
     createChartMock: vi.fn(() => chart),
     areaSeries: Symbol("AreaSeries"),
@@ -45,7 +48,9 @@ afterEach(() => {
   cleanup();
   createChartMock.mockClear();
   addSeriesMock.mockClear();
+  applyOptionsMock.mockClear();
   chartMock.remove.mockClear();
+  vi.unstubAllGlobals();
 });
 
 describe("analytics chart", () => {
@@ -64,7 +69,7 @@ describe("analytics chart", () => {
 
     expect(createChartMock).toHaveBeenCalledWith(expect.any(HTMLDivElement), expect.objectContaining({
       autoSize: true,
-      layout: expect.objectContaining({ background: { color: "#0F084B" } }),
+      layout: expect.objectContaining({ background: { color: "#F7F9F9" } }),
     }));
     expect(addSeriesMock).toHaveBeenCalledTimes(3);
     expect(addSeriesMock.mock.calls.map(([definition]) => definition)).toEqual([areaSeries, lineSeries, histogramSeries]);
@@ -73,6 +78,30 @@ describe("analytics chart", () => {
 
     unmount();
     expect(chartMock.remove).toHaveBeenCalledOnce();
+  });
+
+  it("applies the system color scheme and updates when it changes", () => {
+    let colorSchemeListener: ((event: MediaQueryListEvent) => void) | undefined;
+    const mediaQuery = {
+      matches: true,
+      addEventListener: vi.fn((_event: string, listener: (event: MediaQueryListEvent) => void) => {
+        colorSchemeListener = listener;
+      }),
+      removeEventListener: vi.fn(),
+    };
+    vi.stubGlobal("matchMedia", vi.fn(() => mediaQuery));
+
+    render(<AnalyticsChart ariaLabel="Avance" series={[{ id: "progress", label: "Avance", color: "#00AA80", kind: "area", data: [{ time: "2026-10-08", value: 50 }] }]} />);
+
+    expect(createChartMock).toHaveBeenCalledWith(expect.any(HTMLDivElement), expect.objectContaining({
+      layout: expect.objectContaining({ background: { color: "#0F084B" } }),
+    }));
+
+    colorSchemeListener?.({ matches: false } as MediaQueryListEvent);
+
+    expect(applyOptionsMock).toHaveBeenCalledWith(expect.objectContaining({
+      layout: expect.objectContaining({ background: { color: "#F7F9F9" } }),
+    }));
   });
 
   it("explains empty periods without creating a chart", () => {
