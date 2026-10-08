@@ -37,6 +37,7 @@ El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de ses
 - `/dashboard` — ruta de aprendizaje y progreso.
 - `/dashboard/profile` — edición de perfil y gestión de foto privada.
 - `/dashboard/modules/:id` y `/dashboard/lessons/:id` — consumo de contenido.
+- `/admin/analytics` y `/admin/analytics/students/:id` — tendencias de avance, calificaciones y actividad para admin y trainers.
 - `/admin/modules`, `/admin/modules/new` y `/admin/modules/:id` — catálogo, creación de módulos y listado de lecciones del módulo.
 - `/admin/lessons/new` — editor Tiptap para administradores.
 - `/admin/users` — revisión de registros, roles y estados de cuenta para administradores.

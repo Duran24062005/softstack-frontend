@@ -1,12 +1,17 @@
-import { ArrowRight, BookOpen, CheckCircle, Flag, Sparkle } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, BookOpen, CheckCircle, Flag, Pulse, Sparkle } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
+import { AnalyticsChartCard } from "@/components/analytics/analytics-chart-card";
+import { AnalyticsPeriodSelector } from "@/components/analytics/analytics-period-selector";
 import { Reveal } from "@/components/motion/reveal";
 import { LearningTrajectory } from "@/components/ui/learning-trajectory";
-import { getLearningData, getSession } from "@/lib/server-api";
+import { normalizeAnalyticsPeriod } from "@/lib/analytics";
+import { getLearningData, getMyAnalytics, getSession } from "@/lib/server-api";
 
-export default async function DashboardPage() {
-  const [user, learning] = await Promise.all([getSession(), getLearningData()]);
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
+  const { period: requestedPeriod } = await searchParams;
+  const period = normalizeAnalyticsPeriod(requestedPeriod);
+  const [user, learning, analytics] = await Promise.all([getSession(), getLearningData(), getMyAnalytics(period)]);
   if (!user) return null;
 
   const firstModule = learning.modules[0];
@@ -61,6 +66,49 @@ export default async function DashboardPage() {
           <p className="mt-5 text-base font-bold">Tu próximo paso cuenta</p>
           <p className="mt-1 text-sm text-twilight/52">Convierte lo aprendido en una señal visible.</p>
         </div>
+      </section>
+
+      <section className="mt-16">
+        <div className="flex flex-col justify-between gap-5 border-b border-twilight/13 pb-6 sm:flex-row sm:items-end">
+          <div>
+            <p className="eyebrow text-seaweed">Señales de avance</p>
+            <h2 className="display mt-4 text-4xl tracking-[-.045em] sm:text-5xl">Mira cómo mejoras.</h2>
+            <p className="pretty-copy mt-3 max-w-xl text-sm leading-6 text-twilight/55">Completados e intentos enviados, ordenados por fecha para que identifiques tu ritmo real.</p>
+          </div>
+          <AnalyticsPeriodSelector pathname="/dashboard" period={period} />
+        </div>
+        {analytics ? (
+          <div className="mt-8 grid gap-4 xl:grid-cols-2">
+            <AnalyticsChartCard
+              title="Avance acumulado"
+              description={`${analytics.snapshot.completed_lessons} de ${analytics.snapshot.total_lessons} lecciones publicadas completadas.`}
+              ariaLabel="Avance acumulado del estudiante por fecha"
+              format="percent"
+              series={[{ id: "progress", label: "Avance", color: "#00AA80", kind: "area", data: analytics.progress_series, topColor: "rgba(0, 170, 128, .32)", bottomColor: "rgba(0, 170, 128, .04)" }]}
+            />
+            <AnalyticsChartCard
+              title="Mejora en evaluaciones"
+              description={`${analytics.attempts_count} intentos enviados en el período seleccionado.`}
+              ariaLabel="Promedio de calificaciones del estudiante por fecha"
+              format="percent"
+              series={[{ id: "score", label: "Calificación", color: "#16697A", kind: "line", data: analytics.score_series }]}
+            />
+            <div className="xl:col-span-2">
+              <AnalyticsChartCard
+                title="Actividad registrada"
+                description="Lecciones, módulos e intentos que dejaron una señal en tu ruta."
+                ariaLabel="Actividad del estudiante por fecha"
+                series={[
+                  { id: "lessons", label: "Lecciones", color: "#00AA80", kind: "histogram", data: analytics.activity_series.map((point) => ({ time: point.time, value: point.lessons_completed })) },
+                  { id: "modules", label: "Módulos", color: "#F4B422", kind: "histogram", data: analytics.activity_series.map((point) => ({ time: point.time, value: point.modules_completed })) },
+                  { id: "attempts", label: "Intentos", color: "#16697A", kind: "histogram", data: analytics.activity_series.map((point) => ({ time: point.time, value: point.assessments_submitted })) },
+                ]}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="status-notice status-notice-info mt-8"><Pulse size={19} /> No pudimos cargar tus métricas en este momento.</div>
+        )}
       </section>
 
       <section id="modules" className="mt-20">

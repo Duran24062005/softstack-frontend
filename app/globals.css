@@ -520,6 +520,37 @@ select:focus-visible {
   animation: draw-trajectory 1.25s cubic-bezier(.22, 1, .36, 1) both;
 }
 
+.analytics-chart {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 1rem;
+  background: var(--twilight);
+  color: rgba(255, 255, 255, .72);
+  padding: .5rem;
+}
+
+.analytics-chart-empty {
+  color: rgba(255, 255, 255, .64);
+}
+
+.analytics-chart-data {
+  border-color: rgba(15, 8, 75, .13);
+  background: var(--twilight);
+  color: rgba(255, 255, 255, .7);
+}
+
+.analytics-chart-data-summary {
+  color: var(--gold);
+}
+
+.analytics-chart-data-rule {
+  border-color: rgba(255, 255, 255, .16);
+}
+
+.analytics-chart-data-row {
+  border-color: rgba(255, 255, 255, .08);
+}
+
 @keyframes draw-trajectory {
   from {
     stroke-dashoffset: 100;
@@ -726,13 +757,13 @@ select:focus-visible {
 
 .app-mobile-drawer {
   position: fixed;
-  inset: 0 0 0 auto;
+  inset: 0 auto 0 0;
   z-index: 70;
   display: flex;
   width: min(22rem, calc(100vw - 1rem));
   flex-direction: column;
   background: white;
-  box-shadow: -18px 0 45px rgba(15, 8, 75, .16);
+  box-shadow: 18px 0 45px rgba(15, 8, 75, .16);
   animation: app-drawer-in .22s ease-out both;
 }
 
@@ -752,7 +783,7 @@ select:focus-visible {
 @keyframes app-drawer-in {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(-100%);
   }
 
   to {
@@ -1104,12 +1135,12 @@ select:focus-visible {
 
   .app-nav-desktop {
     position: fixed;
-    inset: 0 0 0 auto;
+    inset: 0 auto 0 0;
     z-index: 50;
     display: flex;
     width: var(--app-nav-width, 18rem);
-    border-left: 1px solid rgba(15, 8, 75, .1);
-    box-shadow: -12px 0 30px rgba(15, 8, 75, .035);
+    border-right: 1px solid rgba(15, 8, 75, .1);
+    box-shadow: 12px 0 30px rgba(15, 8, 75, .035);
     transition: width .25s ease;
   }
 
@@ -1148,8 +1179,8 @@ select:focus-visible {
 
   .app-shell > main,
   .app-shell > .app-footer {
-    margin-right: var(--app-nav-width, 18rem);
-    transition: margin-right .25s ease;
+    margin-left: var(--app-nav-width, 18rem);
+    transition: margin-left .25s ease;
   }
 
   .app-footer {
