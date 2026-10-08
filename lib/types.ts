@@ -13,6 +13,22 @@ export type User = {
   created_at: string;
 };
 
+export type AcademicProfile = {
+  start_year: number;
+  group_name: string;
+  campus_name: string;
+  linkedin_url: string | null;
+  github_url: string | null;
+};
+
+export type AcademicProfileInput = {
+  start_year: number;
+  group_name: string;
+  campus_name: string;
+  linkedin_url: string | null;
+  github_url: string | null;
+};
+
 export type AdminUser = User & {
   status_changed_at: string | null;
   status_changed_by: string | null;
@@ -72,6 +88,76 @@ export type ProgressSummary = {
   completed_module_count: number;
   total_modules: number;
   module_percentage: number;
+};
+
+export type AnalyticsPeriod = "7d" | "30d" | "90d" | "all";
+
+export type AnalyticsPoint = {
+  time: string;
+  value: number;
+};
+
+export type AnalyticsActivityPoint = {
+  time: string;
+  lessons_completed: number;
+  modules_completed: number;
+  assessments_submitted: number;
+  total: number;
+};
+
+export type AnalyticsSnapshot = {
+  completed_lessons: number;
+  total_lessons: number;
+  percentage: number;
+  completed_modules: number;
+  total_modules: number;
+  module_percentage: number;
+};
+
+export type AnalyticsPayload = {
+  period: AnalyticsPeriod;
+  snapshot: AnalyticsSnapshot;
+  active_students: number;
+  average_score: number;
+  progress_series: AnalyticsPoint[];
+  score_series: AnalyticsPoint[];
+  activity_series: AnalyticsActivityPoint[];
+  failed_competencies: Array<{ competency: string; count: number }>;
+};
+
+export type AnalyticsOverview = AnalyticsPayload & {
+  students: number;
+  assigned_students: number;
+  attempts: number;
+};
+
+export type AnalyticsStudent = {
+  id: string;
+  full_name: string;
+  email: string;
+  attempts: number;
+  average_score: number;
+  trainer_id: string | null;
+};
+
+export type StudentAnalytics = AnalyticsPayload & {
+  student_id: string;
+  student_name: string;
+  trainer_id: string | null;
+  attempts: Array<{
+    id: string;
+    assessment_id: string;
+    attempt_number: number;
+    cycle: number;
+    score: number;
+    passed: boolean;
+    submitted_at: string;
+  }>;
+};
+
+export type MyAnalytics = AnalyticsPayload & {
+  student_id: string;
+  attempts_count: number;
 };
 
 export type QuestionOption = { id: string; text: string };

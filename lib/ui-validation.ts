@@ -14,3 +14,14 @@ export function parseHttpUrl(value: string): string {
 
   return parsed.toString();
 }
+
+export function parseOptionalProfileUrl(value: string, provider: "linkedin" | "github"): string | null {
+  if (!value.trim()) return null;
+  const normalized = parseHttpUrl(value);
+  const hostname = new URL(normalized).hostname.toLowerCase().replace(/\.$/, "");
+  const domain = `${provider}.com`;
+  if (hostname !== domain && !hostname.endsWith(`.${domain}`)) {
+    throw new Error(`La URL de ${provider} debe pertenecer a ${domain}.`);
+  }
+  return normalized;
+}

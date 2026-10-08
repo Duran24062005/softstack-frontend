@@ -14,6 +14,7 @@ import {
   getAdminModuleLessons,
   getAdminModules,
   getAdminStudents,
+  getAdminStudentAcademicProfile,
   getAdminTrainers,
   getAdminUsers,
   getAnalyticsOverview,
@@ -25,6 +26,8 @@ import {
   getLessonAssessment,
   getModuleLessons,
   getModuleAssessment,
+  getMyAnalytics,
+  getMyAcademicProfile,
   getStudentAnalytics,
   getSession,
   requireAdmin,
@@ -122,7 +125,7 @@ describe("server API helpers", () => {
     await expect(getEducatorAssessment("assessment-404")).resolves.toBeNull();
   });
 
-  it("forwards empty cookies and returns assessment, analytics and admin fallbacks", async () => {
+  it("forwards empty cookies and returns assessment, analytics and admin responses", async () => {
     cookiesMock.mockResolvedValue({ toString: () => "" });
     fetchMock
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "lesson-assessment" }), { status: 200 }))
@@ -168,11 +171,40 @@ describe("server API helpers", () => {
     await expect(getAdminTrainers()).resolves.toEqual([{ id: "trainer-1" }]);
   });
 
+  it("does not turn an analytics error into fabricated zero metrics", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+
+    await expect(getAnalyticsOverview()).resolves.toBeNull();
+  });
+
   it("loads all admin users with optional role and status filters", async () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", role: "user", account_status: "pending" }]), { status: 200 }));
 
     await expect(getAdminUsers({ role: "user", account_status: "pending" })).resolves.toEqual([{ id: "user-1", role: "user", account_status: "pending" }]);
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/admin/users?role=user&account_status=pending", {
+      cache: "no-store",
+      headers: { Cookie: "session=abc" },
+    });
+  });
+
+  it("loads student academic profiles for the dashboard and admin editor", async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify({ start_year: 2024 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 404 }));
+
+    await expect(getMyAcademicProfile()).resolves.toEqual({ start_year: 2024 });
+    await expect(getAdminStudentAcademicProfile("student-1")).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenLastCalledWith("http://localhost:8000/admin/students/student-1/academic-profile", {
+      cache: "no-store",
+      headers: { Cookie: "session=abc" },
+    });
+  });
+
+  it("loads private analytics with the selected period", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ student_id: "student-1", period: "7d" }), { status: 200 }));
+
+    await expect(getMyAnalytics("7d")).resolves.toEqual({ student_id: "student-1", period: "7d" });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/me/analytics?period=7d", {
       cache: "no-store",
       headers: { Cookie: "session=abc" },
     });

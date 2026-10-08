@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { apiFetch } from "@/lib/api";
+import { ApiError, apiFetch } from "@/lib/api";
 
 describe("apiFetch", () => {
   const fetchMock = vi.fn<typeof fetch>();
@@ -44,9 +44,14 @@ describe("apiFetch", () => {
   });
 
   it("uses the backend detail when a request fails", async () => {
-    fetchMock.mockResolvedValue(new Response(JSON.stringify({ detail: "Sesión expirada." }), { status: 401 }));
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ detail: "Sesión expirada.", code: "SESSION_EXPIRED" }), { status: 401 }));
 
-    await expect(apiFetch("/auth/me")).rejects.toThrow("Sesión expirada.");
+    await expect(apiFetch("/auth/me")).rejects.toMatchObject({
+      name: "ApiError",
+      message: "Sesión expirada.",
+      status: 401,
+      code: "SESSION_EXPIRED",
+    } satisfies Partial<ApiError>);
   });
 
   it("falls back to the generic error for an invalid error body", async () => {

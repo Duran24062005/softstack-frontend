@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import type { AccountStatus, AdminUser, Assessment, AssessmentAdmin, Lesson, Module, ProgressSummary, User, UserRole } from "@/lib/types";
+import type { AcademicProfile, AccountStatus, AdminUser, AnalyticsOverview, AnalyticsPeriod, AnalyticsStudent, Assessment, AssessmentAdmin, Lesson, Module, MyAnalytics, ProgressSummary, StudentAnalytics, User, UserRole } from "@/lib/types";
 
 const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
 
@@ -96,18 +96,27 @@ export async function getEducatorAssessment(id: string): Promise<AssessmentAdmin
   return response.ok ? response.json() : null;
 }
 
-export async function getAnalyticsOverview(): Promise<{ students: number; assigned_students: number; attempts: number; average_score: number; failed_competencies: Array<{ competency: string; count: number }> }> {
-  const response = await serverFetch<{ students: number; assigned_students: number; attempts: number; average_score: number; failed_competencies: Array<{ competency: string; count: number }> }>("/educator/analytics/overview");
-  return response.ok ? response.json() : { students: 0, assigned_students: 0, attempts: 0, average_score: 0, failed_competencies: [] };
+function analyticsPath(path: string, period: AnalyticsPeriod): string {
+  return `${path}?period=${encodeURIComponent(period)}`;
 }
 
-export async function getAnalyticsStudents(): Promise<Array<{ id: string; full_name: string; email: string; attempts: number; average_score: number; trainer_id: string | null }>> {
-  const response = await serverFetch<Array<{ id: string; full_name: string; email: string; attempts: number; average_score: number; trainer_id: string | null }>>("/educator/analytics/students");
+export async function getMyAnalytics(period: AnalyticsPeriod = "30d"): Promise<MyAnalytics | null> {
+  const response = await serverFetch<MyAnalytics>(analyticsPath("/me/analytics", period));
+  return response.ok ? response.json() : null;
+}
+
+export async function getAnalyticsOverview(period: AnalyticsPeriod = "30d"): Promise<AnalyticsOverview | null> {
+  const response = await serverFetch<AnalyticsOverview>(analyticsPath("/educator/analytics/overview", period));
+  return response.ok ? response.json() : null;
+}
+
+export async function getAnalyticsStudents(period: AnalyticsPeriod = "30d"): Promise<AnalyticsStudent[]> {
+  const response = await serverFetch<AnalyticsStudent[]>(analyticsPath("/educator/analytics/students", period));
   return response.ok ? response.json() : [];
 }
 
-export async function getStudentAnalytics(id: string): Promise<{ student_id: string; student_name: string; trainer_id: string | null; attempts: Array<{ id: string; assessment_id: string; attempt_number: number; cycle: number; score: number; passed: boolean; submitted_at: string }>; failed_competencies: Array<{ competency: string; count: number }> } | null> {
-  const response = await serverFetch(`/educator/analytics/students/${id}`);
+export async function getStudentAnalytics(id: string, period: AnalyticsPeriod = "30d"): Promise<StudentAnalytics | null> {
+  const response = await serverFetch<StudentAnalytics>(analyticsPath(`/educator/analytics/students/${id}`, period));
   return response.ok ? response.json() : null;
 }
 
@@ -133,4 +142,14 @@ export async function getAdminUsers(filters?: { role?: UserRole; account_status?
   const query = params.toString();
   const response = await serverFetch<AdminUser[]>(`/admin/users${query ? `?${query}` : ""}`);
   return response.ok ? response.json() : [];
+}
+
+export async function getMyAcademicProfile(): Promise<AcademicProfile | null> {
+  const response = await serverFetch<AcademicProfile | null>("/auth/me/academic-profile");
+  return response.ok ? response.json() : null;
+}
+
+export async function getAdminStudentAcademicProfile(id: string): Promise<AcademicProfile | null> {
+  const response = await serverFetch<AcademicProfile | null>(`/admin/students/${id}/academic-profile`);
+  return response.ok ? response.json() : null;
 }
