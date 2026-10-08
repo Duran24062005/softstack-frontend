@@ -16,6 +16,8 @@ export default defineConfig({
       include: [
         "lib/api.ts",
         "lib/server-api.ts",
+        "components/auth/auth-form.tsx",
+        "components/auth/verify-email-form.tsx",
         "components/dashboard/quiz-panel.tsx",
         "components/admin/assessment-editor.tsx",
         "components/admin/assessment-settings-form.tsx",
