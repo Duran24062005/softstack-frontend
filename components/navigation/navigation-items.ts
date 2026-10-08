@@ -18,6 +18,7 @@ const adminItems: NavigationItem[] = [
 ];
 
 const ownerItems: NavigationItem[] = [
+  { href: "/admin/users", label: "Usuarios", section: "admin" },
   { href: "/admin/settings", label: "Configuración", section: "admin" },
   { href: "/admin/trainers", label: "Trainers", section: "admin" },
 ];

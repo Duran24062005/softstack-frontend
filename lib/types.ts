@@ -1,4 +1,5 @@
 export type UserRole = "user" | "trainer" | "admin";
+export type AccountStatus = "pending" | "active" | "rejected" | "inactive";
 
 export type User = {
   id: string;
@@ -6,9 +7,15 @@ export type User = {
   email: string;
   role: UserRole;
   is_active: boolean;
+  account_status: AccountStatus;
   email_verified: boolean;
   has_profile_photo: boolean;
   created_at: string;
+};
+
+export type AdminUser = User & {
+  status_changed_at: string | null;
+  status_changed_by: string | null;
 };
 
 export type AuthSession = {

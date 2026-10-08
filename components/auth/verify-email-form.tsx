@@ -42,12 +42,12 @@ export function VerifyEmailForm({ token = "", pendingEmail = "" }: { token?: str
     <AuthShell
       eyebrow="Un último paso"
       title="Confirma tu correo."
-      description={token ? "Estamos validando el enlace para activar tu cuenta." : "Revisa tu bandeja de entrada y abre el enlace que te enviamos."}
+      description={token ? "Estamos validando el enlace. Después de confirmar tu correo, un administrador revisará tu solicitud." : "Revisa tu bandeja de entrada y abre el enlace que te enviamos. Después tendrás que esperar la aprobación administrativa."}
       backHref="/"
       backLabel="Volver al inicio"
     >
       {loading ? <StatusNotice tone="info">Validando el enlace…</StatusNotice> : null}
-      {message ? <StatusNotice tone="success">{message} <Link href="/login" className="font-semibold underline">Entrar</Link></StatusNotice> : null}
+      {message ? <StatusNotice tone="success">{message} Tu cuenta queda pendiente de aprobación administrativa. <Link href="/login" className="font-semibold underline">Entrar</Link></StatusNotice> : null}
       {error ? <StatusNotice tone="error">{error}</StatusNotice> : null}
       {!token ? (
         <form onSubmit={resend} className="mt-6 space-y-5">

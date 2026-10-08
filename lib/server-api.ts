@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import type { Assessment, AssessmentAdmin, Lesson, Module, ProgressSummary, User } from "@/lib/types";
+import type { AccountStatus, AdminUser, Assessment, AssessmentAdmin, Lesson, Module, ProgressSummary, User, UserRole } from "@/lib/types";
 
 const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
 
@@ -123,5 +123,14 @@ export async function getAdminStudents(): Promise<Array<{ id: string; full_name:
 
 export async function getAdminTrainers(): Promise<Array<{ id: string; full_name: string; email: string }>> {
   const response = await serverFetch<Array<{ id: string; full_name: string; email: string }>>("/admin/trainers");
+  return response.ok ? response.json() : [];
+}
+
+export async function getAdminUsers(filters?: { role?: UserRole; account_status?: AccountStatus }): Promise<AdminUser[]> {
+  const params = new URLSearchParams();
+  if (filters?.role) params.set("role", filters.role);
+  if (filters?.account_status) params.set("account_status", filters.account_status);
+  const query = params.toString();
+  const response = await serverFetch<AdminUser[]>(`/admin/users${query ? `?${query}` : ""}`);
   return response.ok ? response.json() : [];
 }

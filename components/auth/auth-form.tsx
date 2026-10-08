@@ -44,7 +44,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     <AuthShell
       eyebrow={register ? "Empieza tu ruta" : "Qué bueno verte"}
       title={register ? "Haz visible lo que sabes hacer." : "Continúa desde donde quedaste."}
-      description={register ? "Crea tu cuenta y construye una presencia profesional a tu ritmo." : "Entra a tu espacio y retoma el siguiente movimiento de tu ruta."}
+      description={register ? "Crea tu cuenta, confirma tu correo y espera la revisión de un administrador antes de entrar a tu ruta." : "Entra a tu espacio y retoma el siguiente movimiento de tu ruta."}
       backHref="/"
       backLabel="Volver al inicio"
     >
