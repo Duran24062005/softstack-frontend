@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, applyLessonContent, applyModuleContent, discardContentRevision, publishContentRevision, suggestLessonContent, suggestModuleContent } from "@/lib/api";
 
 describe("apiFetch", () => {
   const fetchMock = vi.fn<typeof fetch>();
@@ -64,5 +64,27 @@ describe("apiFetch", () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
 
     await expect(apiFetch<void>("/auth/logout", { method: "POST" })).resolves.toBeUndefined();
+  });
+
+  it("uses the server-side content suggestion and revision endpoints", async () => {
+    const response = { target_type: "lesson", mode: "create", instructional_plan: {}, content: null };
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify(response), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(response), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ outcome: "updated" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ outcome: "revision_created" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ outcome: "updated" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "revision-1" }), { status: 200 }));
+
+    await suggestModuleContent({ topic: "Módulo" });
+    await suggestLessonContent({ topic: "Lección" });
+    await applyModuleContent("module-1", { base_updated_at: "2026-10-09T00:00:00Z", plan_sections: ["objectives"], instructional_plan: {} as never });
+    await applyLessonContent("lesson-1", { base_updated_at: "2026-10-09T00:00:00Z", sections: ["content"], title: "Lección", description: "", estimated_minutes: 20, instructional_plan: {} as never });
+    await publishContentRevision("revision-1");
+    await discardContentRevision("revision-1");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/backend/educator/content-suggestions/modules", expect.objectContaining({ method: "POST" }));
+    expect(fetchMock).toHaveBeenNthCalledWith(5, "/api/backend/educator/content-revisions/revision-1/publish", expect.objectContaining({ method: "POST" }));
+    expect(fetchMock).toHaveBeenNthCalledWith(6, "/api/backend/educator/content-revisions/revision-1", expect.objectContaining({ method: "DELETE" }));
   });
 });
