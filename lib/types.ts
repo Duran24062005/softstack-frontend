@@ -46,6 +46,42 @@ export type TiptapDocument = {
   content: Array<Record<string, unknown>>;
 };
 
+export type ContentFormat = "text" | "video" | "activity" | "interactive" | "gamification";
+export type OrderingStrategy = "simple_to_complex" | "chronological" | "categorical" | "cause_effect" | "hierarchy" | "alphabetical";
+
+export type ConceptMapNode = {
+  label: string;
+  children: ConceptMapNode[];
+};
+
+export type SessionPlanItem = {
+  title: string;
+  minutes: number;
+  activity: string;
+  format: ContentFormat;
+};
+
+export type LessonBlueprint = {
+  key: string;
+  source_id?: string | null;
+  title: string;
+  description: string;
+  objective: string;
+  estimated_minutes: number;
+  recommended_formats: ContentFormat[];
+};
+
+export type InstructionalPlan = {
+  central_topic: string;
+  learning_objectives: string[];
+  concept_map: ConceptMapNode | null;
+  ordering_strategy: OrderingStrategy;
+  ordering_rationale: string;
+  recommended_formats: ContentFormat[];
+  session_plan: SessionPlanItem[];
+  lesson_sequence: LessonBlueprint[];
+};
+
 export type MediaReference = {
   url: string;
   pathname: string;
@@ -61,6 +97,7 @@ export type Module = {
   order: number;
   status: "draft" | "published" | "archived";
   cover_media: MediaReference | null;
+  instructional_plan: InstructionalPlan | null;
   created_at: string;
   updated_at: string;
 };
@@ -75,6 +112,7 @@ export type Lesson = {
   order: number;
   status: "draft" | "published" | "archived";
   estimated_minutes: number;
+  instructional_plan: InstructionalPlan | null;
   created_at: string;
   updated_at: string;
 };
@@ -231,6 +269,41 @@ export type AssessmentAdminQuestion = AssessmentQuestion & {
 };
 
 export type AssessmentAdmin = Omit<Assessment, "questions"> & { questions: AssessmentAdminQuestion[] };
+
+export type ContentSuggestion = {
+  target_type: "module" | "lesson";
+  mode: "create" | "organize";
+  target_id: string | null;
+  base_updated_at: string | null;
+  provider: string;
+  model: string | null;
+  title: string;
+  description: string;
+  estimated_minutes: number | null;
+  instructional_plan: InstructionalPlan;
+  content: TiptapDocument | null;
+};
+
+export type ModulePlanSection = "fields" | "objectives" | "concept_map" | "formats" | "session_plan" | "lesson_sequence";
+export type LessonApplySection = "fields" | "objectives" | "concept_map" | "formats" | "session_plan" | "content";
+
+export type ContentRevision = {
+  id: string;
+  target_type: "module" | "lesson";
+  target_id: string;
+  status: "pending" | "published" | "discarded";
+  source: "ai_content_suggestion";
+  base_updated_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ContentApplyResponse = {
+  outcome: "updated" | "revision_created";
+  revision: ContentRevision | null;
+  module: Module | null;
+  lesson: Lesson | null;
+};
 
 export type ProfileUpdateRequest = {
   full_name?: string;

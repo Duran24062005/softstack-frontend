@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import type { AcademicProfile, AccountStatus, AdminUser, AnalyticsOverview, AnalyticsPeriod, AnalyticsStudent, Assessment, AssessmentAdmin, Lesson, Module, MyAnalytics, ProgressSummary, StudentAnalytics, User, UserRole } from "@/lib/types";
+import type { AcademicProfile, AccountStatus, AdminUser, AnalyticsOverview, AnalyticsPeriod, AnalyticsStudent, Assessment, AssessmentAdmin, ContentRevision, Lesson, Module, MyAnalytics, ProgressSummary, StudentAnalytics, User, UserRole } from "@/lib/types";
 
 const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
 
@@ -151,5 +151,10 @@ export async function getMyAcademicProfile(): Promise<AcademicProfile | null> {
 
 export async function getAdminStudentAcademicProfile(id: string): Promise<AcademicProfile | null> {
   const response = await serverFetch<AcademicProfile | null>(`/admin/students/${id}/academic-profile`);
+  return response.ok ? response.json() : null;
+}
+
+export async function getPendingContentRevision(targetType: "module" | "lesson", id: string): Promise<ContentRevision | null> {
+  const response = await serverFetch<ContentRevision>(`/educator/content-revisions/${targetType}/${id}`);
   return response.ok ? response.json() : null;
 }

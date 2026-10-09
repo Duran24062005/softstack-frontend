@@ -7,10 +7,11 @@ import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { StatusNotice } from "@/components/ui/status-notice";
+import { ContentAiAssistant, type ContentAssistantSection } from "@/components/admin/content-ai-assistant";
 import { UrlDialog } from "@/components/ui/url-dialog";
 import { apiFetch } from "@/lib/api";
 import { deleteContentMedia, getMediaKind, importContentMedia, uploadContentMedia } from "@/lib/content-media";
-import type { MediaReference, Module } from "@/lib/types";
+import type { ContentSuggestion, MediaReference, Module } from "@/lib/types";
 
 export function ModuleForm() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export function ModuleForm() {
   const [order, setOrder] = useState("0");
   const [status, setStatus] = useState<Module["status"]>("draft");
   const [coverMedia, setCoverMedia] = useState<MediaReference | null>(null);
+  const [instructionalPlan, setInstructionalPlan] = useState<Module["instructional_plan"]>(null);
   const [mediaStatus, setMediaStatus] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -61,7 +63,7 @@ export function ModuleForm() {
     }
     setSaving(true);
     try {
-      await apiFetch<Module>("/admin/modules", { method: "POST", body: JSON.stringify({ title, description, order: Number(order), status, cover_media: coverMedia }) });
+      await apiFetch<Module>("/admin/modules", { method: "POST", body: JSON.stringify({ title, description, order: Number(order), status, cover_media: coverMedia, instructional_plan: instructionalPlan }) });
       pendingUploadRef.current = null;
       router.push("/admin/modules");
       router.refresh();
@@ -79,6 +81,23 @@ export function ModuleForm() {
     setCoverMedia(null);
     if (pending) void deleteContentMedia(pending).catch(() => undefined);
   };
+
+  function applySuggestion(suggestion: ContentSuggestion, sections: ContentAssistantSection[]) {
+    const current = instructionalPlan ?? suggestion.instructional_plan;
+    const next = { ...current };
+    if (sections.includes("objectives")) next.learning_objectives = suggestion.instructional_plan.learning_objectives;
+    if (sections.includes("concept_map")) next.concept_map = suggestion.instructional_plan.concept_map;
+    if (sections.includes("formats")) next.recommended_formats = suggestion.instructional_plan.recommended_formats;
+    if (sections.includes("session_plan")) next.session_plan = suggestion.instructional_plan.session_plan;
+    if (sections.includes("lesson_sequence")) next.lesson_sequence = suggestion.instructional_plan.lesson_sequence;
+    next.central_topic = suggestion.instructional_plan.central_topic;
+    next.ordering_strategy = suggestion.instructional_plan.ordering_strategy;
+    next.ordering_rationale = suggestion.instructional_plan.ordering_rationale;
+    setTitle(sections.includes("fields") ? suggestion.title : title || suggestion.title);
+    setDescription(sections.includes("fields") ? suggestion.description : description || suggestion.description);
+    setInstructionalPlan(next);
+    return Promise.resolve();
+  }
 
   return (
     <>
@@ -102,6 +121,7 @@ export function ModuleForm() {
         {error ? <StatusNotice tone="error" className="mt-5">{error}</StatusNotice> : null}
         <button disabled={saving} className="button button-primary button-large mt-7">{saving ? <CircleNotch className="animate-spin" size={18} /> : <ArrowRight size={18} weight="bold" />}{saving ? "Creando módulo…" : "Crear módulo"}</button>
       </form>
+      <ContentAiAssistant target="module" mode="create" initialTopic={title} getPayload={() => ({ title, description })} onApply={applySuggestion} />
       <UrlDialog open={urlDialogOpen} onClose={() => setUrlDialogOpen(false)} onSubmit={importCover} title="Importar portada" description="Guardaremos una copia pública de la imagen o el video en el almacenamiento de contenido." submitLabel="Importar portada" />
     </>
   );

@@ -5,9 +5,10 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useRef, useState, type ElementType } from "react";
 import { useRouter } from "next/navigation";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, applyLessonContent, discardContentRevision, publishContentRevision } from "@/lib/api";
 import { collectMediaPathnames, deleteContentMedia, getMediaKind, importContentMedia, uploadContentMedia } from "@/lib/content-media";
-import type { Lesson, MediaReference, Module, TiptapDocument } from "@/lib/types";
+import type { ContentSuggestion, Lesson, LessonApplySection, MediaReference, Module, ModulePlanSection, TiptapDocument, ContentRevision } from "@/lib/types";
+import { ContentAiAssistant } from "@/components/admin/content-ai-assistant";
 import { createContentExtensions } from "@/components/editor/media-extensions";
 import { StatusNotice } from "@/components/ui/status-notice";
 import { UrlDialog } from "@/components/ui/url-dialog";
@@ -37,7 +38,7 @@ function mediaNode(reference: MediaReference) {
   return { type: "image", attrs: { src: reference.url, alt: "Media de la lección", mediaPathname: reference.pathname, mediaContentType: reference.content_type, mediaSize: reference.size } };
 }
 
-function BlockFormatMenu({ editor, open, onToggle, onClose, onAddMedia }: { editor: TiptapEditor; open: boolean; onToggle: () => void; onClose: () => void; onAddMedia: () => void }) {
+export function BlockFormatMenu({ editor, open, onToggle, onClose, onAddMedia }: { editor: TiptapEditor; open: boolean; onToggle: () => void; onClose: () => void; onAddMedia: () => void }) {
   const actions: BlockAction[] = [
     { icon: TextTIcon, label: "Texto", active: editor.isActive("paragraph"), run: () => editor.chain().focus().setParagraph().run() },
     { icon: TextHOneIcon, label: "Título 1", active: editor.isActive("heading", { level: 1 }), run: () => editor.chain().focus().setHeading({ level: 1 }).run() },
@@ -57,7 +58,7 @@ function InlineSelectionMenu({ editor, position, onAddLink }: { editor: TiptapEd
   return <div className="inline-selection-menu" style={{ top: position.top, left: position.left }} role="toolbar" aria-label="Formato del texto seleccionado"><button type="button" aria-label="Negrita" title="Negrita" className={editor.isActive("bold") ? "is-active" : ""} onMouseDown={(event) => event.preventDefault()} onClick={() => editor.chain().focus().toggleBold().run()}><TextBIcon size={17} weight="bold" /></button><button type="button" aria-label="Cursiva" title="Cursiva" className={editor.isActive("italic") ? "is-active" : ""} onMouseDown={(event) => event.preventDefault()} onClick={() => editor.chain().focus().toggleItalic().run()}><TextItalicIcon size={17} weight="bold" /></button><button type="button" aria-label="Enlace" title="Enlace" className={editor.isActive("link") ? "is-active" : ""} onMouseDown={(event) => event.preventDefault()} onClick={onAddLink}><LinkIcon size={17} weight="bold" /></button></div>;
 }
 
-export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Lesson; modules: Module[]; initialModuleId?: string }) {
+export function LessonEditor({ lesson, modules, initialModuleId, initialRevision }: { lesson?: Lesson; modules: Module[]; initialModuleId?: string; initialRevision?: ContentRevision | null }) {
   const router = useRouter();
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +69,8 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
   const [moduleId, setModuleId] = useState(lesson?.module_id ?? initialModuleId ?? modules[0]?.id ?? "");
   const [status, setStatus] = useState<Lesson["status"]>(lesson?.status ?? "draft");
   const [minutes, setMinutes] = useState(String(lesson?.estimated_minutes ?? 10));
+  const [instructionalPlan, setInstructionalPlan] = useState<Lesson["instructional_plan"]>(lesson?.instructional_plan ?? null);
+  const [revision, setRevision] = useState<ContentRevision | null>(initialRevision ?? null);
   const [error, setError] = useState("");
   const [mediaStatus, setMediaStatus] = useState("");
   const [saving, setSaving] = useState(false);
@@ -186,6 +189,69 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
     pendingUploadsRef.current.clear();
   }
 
+  async function applySuggestion(suggestion: ContentSuggestion, sections: Array<LessonApplySection | ModulePlanSection>) {
+    const current = instructionalPlan ?? suggestion.instructional_plan;
+    const next = { ...current };
+    if (sections.includes("objectives")) next.learning_objectives = suggestion.instructional_plan.learning_objectives;
+    if (sections.includes("concept_map")) next.concept_map = suggestion.instructional_plan.concept_map;
+    if (sections.includes("formats")) next.recommended_formats = suggestion.instructional_plan.recommended_formats;
+    if (sections.includes("session_plan")) next.session_plan = suggestion.instructional_plan.session_plan;
+    if (sections.includes("lesson_sequence")) next.lesson_sequence = suggestion.instructional_plan.lesson_sequence;
+    next.central_topic = suggestion.instructional_plan.central_topic;
+    next.ordering_strategy = suggestion.instructional_plan.ordering_strategy;
+    next.ordering_rationale = suggestion.instructional_plan.ordering_rationale;
+    const nextTitle = sections.includes("fields") ? suggestion.title : title || suggestion.title;
+    const nextDescription = sections.includes("fields") ? suggestion.description : description || suggestion.description;
+    const nextMinutes = sections.includes("fields") ? String(suggestion.estimated_minutes ?? minutes) : minutes;
+    if (sections.includes("fields")) {
+      setTitle(nextTitle);
+      setDescription(nextDescription);
+      setMinutes(nextMinutes);
+    }
+    if (sections.includes("content") && suggestion.content && editor) editor.commands.setContent(suggestion.content);
+    setInstructionalPlan(next);
+    if (lesson && suggestion.base_updated_at) {
+      const response = await applyLessonContent(lesson.id, {
+        base_updated_at: suggestion.base_updated_at,
+        sections: sections as LessonApplySection[],
+        title: nextTitle,
+        description: nextDescription,
+        estimated_minutes: Number(nextMinutes),
+        instructional_plan: next,
+        content: suggestion.content ?? undefined,
+      });
+      if (response.revision) setRevision(response.revision);
+    }
+  }
+
+  async function publishRevision() {
+    if (!revision) return;
+    try {
+      await publishContentRevision(revision.id);
+      setRevision(null);
+      router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "No pudimos publicar la revisión.");
+    }
+  }
+
+  async function discardRevision() {
+    if (!revision) return;
+    try {
+      await discardContentRevision(revision.id);
+      setRevision(null);
+      if (lesson) {
+        setTitle(lesson.title);
+        setDescription(lesson.description);
+        setMinutes(String(lesson.estimated_minutes));
+        setInstructionalPlan(lesson.instructional_plan);
+        editor?.commands.setContent(lesson.content);
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "No pudimos descartar la revisión.");
+    }
+  }
+
   async function save() {
     if (!editor || title.trim().length < 3 || !moduleId) {
       setError("Completa el título y selecciona un módulo.");
@@ -198,7 +264,7 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
     const removedPending = [...pendingUploadsRef.current.values()].filter((reference) => !referencedPathnames.has(reference.pathname));
     await Promise.allSettled(removedPending.map((reference) => deleteContentMedia(reference)));
     removedPending.forEach((reference) => pendingUploadsRef.current.delete(reference.pathname));
-    const payload = { title, description, status, estimated_minutes: Number(minutes), content };
+    const payload = { title, description, status, estimated_minutes: Number(minutes), content, instructional_plan: instructionalPlan };
     try {
       await apiFetch<Lesson>(lesson ? `/admin/lessons/${lesson.id}` : `/admin/modules/${moduleId}/lessons`, { method: lesson ? "PATCH" : "POST", body: JSON.stringify(payload) });
       pendingUploadsRef.current.clear();
@@ -211,5 +277,5 @@ export function LessonEditor({ lesson, modules, initialModuleId }: { lesson?: Le
     }
   }
 
-  return <><div className="grid gap-7 lg:grid-cols-[0.8fr_1.2fr]"><aside className="surface h-fit space-y-5 p-5 sm:p-6"><div><p className="eyebrow text-seaweed">Configuración</p><p className="mt-2 text-sm leading-6 text-twilight/55">Define el contexto antes de construir la experiencia de aprendizaje.</p></div><label className="field"><span>Título</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej. Cómo escribir logros cuantificables" /></label><label className="field"><span>Descripción</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder="Qué aprenderá el estudiante…" /></label>{!lesson && <label className="field"><span>Módulo</span><select value={moduleId} onChange={(event) => setModuleId(event.target.value)}>{modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}</select></label>}<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1"><label className="field"><span>Estado</span><select value={status} onChange={(event) => setStatus(event.target.value as Lesson["status"])}><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></label><label className="field"><span>Minutos estimados</span><input value={minutes} onChange={(event) => setMinutes(event.target.value)} type="number" min={1} max={240} /></label></div><input ref={fileInputRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadFile(file); }} /><button type="button" onClick={save} disabled={saving} className="button button-primary button-large w-full">{saving ? "Guardando…" : "Guardar lección"}</button>{mediaStatus ? <StatusNotice tone="info">{mediaStatus}</StatusNotice> : null}{error ? <StatusNotice tone="error">{error}</StatusNotice> : null}</aside><section className="editor-frame"><div className="flex items-center justify-between border-b border-twilight/10 px-5 py-4"><div><p className="eyebrow text-teal">Lienzo de lección</p><p className="mt-1 text-xs text-twilight/45">Selecciona texto para aplicar formato o enlazarlo.</p></div><button type="button" className="button button-secondary" onClick={() => setUrlDialog("media")}>Importar media</button></div><div ref={canvasRef} className="editor-canvas">{editor && <div className="editor-block-controls" style={{ top: blockPosition.top, left: blockPosition.left }}><BlockFormatMenu editor={editor} open={blockMenuOpen} onToggle={() => setBlockMenuOpen((current) => !current)} onClose={() => setBlockMenuOpen(false)} onAddMedia={() => fileInputRef.current?.click()} /></div>}{editor && inlinePosition && <InlineSelectionMenu editor={editor} position={inlinePosition} onAddLink={addLink} />}<EditorContent editor={editor} /><div className="px-5 pb-5 text-xs text-twilight/45"><button type="button" className="font-semibold text-teal underline underline-offset-2" onClick={addMediaFromUrl}>Importar medio desde una URL</button></div></div></section></div><UrlDialog open={urlDialog !== null} onClose={() => setUrlDialog(null)} onSubmit={urlDialog === "link" ? insertLink : importMediaFromUrl} title={urlDialog === "link" ? "Añadir enlace" : "Importar imagen o video"} description={urlDialog === "link" ? "Conecta el texto seleccionado con un recurso de confianza." : "Guardaremos una copia pública del recurso en el almacenamiento de contenido."} submitLabel={urlDialog === "link" ? "Añadir enlace" : "Importar recurso"} /></>;
+  return <><div className="grid gap-7 lg:grid-cols-[0.8fr_1.2fr]"><aside className="surface h-fit space-y-5 p-5 sm:p-6"><div><p className="eyebrow text-seaweed">Configuración</p><p className="mt-2 text-sm leading-6 text-twilight/55">Define el contexto antes de construir la experiencia de aprendizaje.</p></div><label className="field"><span>Título</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej. Cómo escribir logros cuantificables" disabled={Boolean(revision)} /></label><label className="field"><span>Descripción</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder="Qué aprenderá el estudiante…" disabled={Boolean(revision)} /></label>{!lesson && <label className="field"><span>Módulo</span><select value={moduleId} onChange={(event) => setModuleId(event.target.value)}>{modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}</select></label>}<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1"><label className="field"><span>Estado</span><select value={status} onChange={(event) => setStatus(event.target.value as Lesson["status"])} disabled={Boolean(revision)}><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></label><label className="field"><span>Minutos estimados</span><input value={minutes} onChange={(event) => setMinutes(event.target.value)} type="number" min={1} max={240} disabled={Boolean(revision)} /></label></div><input ref={fileInputRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadFile(file); }} /><button type="button" onClick={save} disabled={saving || Boolean(revision)} className="button button-primary button-large w-full">{revision ? "Resuelve la revisión pendiente" : saving ? "Guardando…" : "Guardar lección"}</button>{mediaStatus ? <StatusNotice tone="info">{mediaStatus}</StatusNotice> : null}{error ? <StatusNotice tone="error">{error}</StatusNotice> : null}</aside><section className="editor-frame"><div className="flex items-center justify-between border-b border-twilight/10 px-5 py-4"><div><p className="eyebrow text-teal">Lienzo de lección</p><p className="mt-1 text-xs text-twilight/45">Selecciona texto para aplicar formato o enlazarlo.</p></div><button type="button" className="button button-secondary" onClick={() => setUrlDialog("media")} disabled={Boolean(revision)}>Importar media</button></div><div ref={canvasRef} className="editor-canvas">{editor && <div className="editor-block-controls" style={{ top: blockPosition.top, left: blockPosition.left }}><BlockFormatMenu editor={editor} open={blockMenuOpen} onToggle={() => setBlockMenuOpen((current) => !current)} onClose={() => setBlockMenuOpen(false)} onAddMedia={() => fileInputRef.current?.click()} /></div>}{editor && inlinePosition && <InlineSelectionMenu editor={editor} position={inlinePosition} onAddLink={addLink} />}<EditorContent editor={editor} /><div className="px-5 pb-5 text-xs text-twilight/45"><button type="button" className="font-semibold text-teal underline underline-offset-2" onClick={addMediaFromUrl} disabled={Boolean(revision)}>Importar medio desde una URL</button></div></div></section></div><ContentAiAssistant target="lesson" mode={lesson ? "organize" : "create"} targetId={lesson?.id} initialTopic={title} currentSummary={{ title, description, items: lesson ? [editor?.getText() || "Contenido actual"] : undefined }} getPayload={() => ({ title, description, objective: instructionalPlan?.learning_objectives[0] ?? "", module_title: modules.find((module) => module.id === moduleId)?.title ?? "", module_description: modules.find((module) => module.id === moduleId)?.description ?? "", estimated_minutes: Number(minutes), content: editor?.getJSON() ?? { type: "doc", content: [] }, instructional_plan: instructionalPlan })} onApply={applySuggestion} />{revision ? <StatusNotice tone="info" className="mt-4">Hay una revisión de IA pendiente. <button type="button" className="ml-2 font-semibold underline" onClick={() => void publishRevision()}>Publicar versión</button><button type="button" className="ml-3 font-semibold underline" onClick={() => void discardRevision()}>Descartar</button></StatusNotice> : null}<UrlDialog open={urlDialog !== null} onClose={() => setUrlDialog(null)} onSubmit={urlDialog === "link" ? insertLink : importMediaFromUrl} title={urlDialog === "link" ? "Añadir enlace" : "Importar imagen o video"} description={urlDialog === "link" ? "Conecta el texto seleccionado con un recurso de confianza." : "Guardaremos una copia pública del recurso en el almacenamiento de contenido."} submitLabel={urlDialog === "link" ? "Añadir enlace" : "Importar recurso"} /></>;
 }

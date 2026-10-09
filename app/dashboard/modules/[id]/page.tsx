@@ -8,6 +8,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { QuizPanel } from "@/components/dashboard/quiz-panel";
 import { getLearningData, getModuleAssessment, getModuleLessons, requireSession, serverFetch } from "@/lib/server-api";
 import type { Module } from "@/lib/types";
+import { InstructionalPlanSummary } from "@/components/dashboard/instructional-plan-summary";
 
 export default async function ModulePage({ params }: { params: Promise<{ id: string }> }) {
   await requireSession();
@@ -49,6 +50,7 @@ export default async function ModulePage({ params }: { params: Promise<{ id: str
           )}
         </Reveal>
       </section>
+      <InstructionalPlanSummary plan={learningModule.instructional_plan} />
       <section className="mt-16">
         <div className="flex items-end justify-between gap-5 border-b border-twilight/13 pb-5">
           <div><p className="eyebrow text-teal">Contenido del módulo</p><h2 className="display mt-3 text-3xl tracking-[-.04em]">Tu siguiente tramo.</h2></div>

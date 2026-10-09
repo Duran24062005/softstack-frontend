@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { LessonContent } from "@/components/dashboard/lesson-content";
 import { QuizPanel } from "@/components/dashboard/quiz-panel";
 import { getLesson, getLessonAssessment, requireSession } from "@/lib/server-api";
+import { InstructionalPlanSummary } from "@/components/dashboard/instructional-plan-summary";
 
 export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSession();
@@ -27,6 +28,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
             {assessment?.passed ? <span className="inline-flex items-center gap-2 rounded-lg bg-seaweed/10 px-3 py-2 text-[#006c53]"><CheckCircle size={16} weight="fill" /> Aprobada</span> : null}
           </div>
         </header>
+        <InstructionalPlanSummary plan={lesson.instructional_plan} />
         <article className="surface mt-8 p-3 sm:p-7 lg:p-10"><LessonContent content={lesson.content} /></article>
         <QuizPanel assessment={assessment} />
       </div>
