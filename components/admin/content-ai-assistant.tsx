@@ -4,8 +4,9 @@ import { Check, CircleNotch, Sparkle } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 
 import { suggestLessonContent, suggestModuleContent } from "@/lib/api";
+import { mapApiErrorToToast } from "@/lib/response-messages";
 import type { ContentSuggestion, LessonApplySection, ModulePlanSection } from "@/lib/types";
-import { StatusNotice } from "@/components/ui/status-notice";
+import { useToast } from "@/components/ui/toast";
 
 type Target = "module" | "lesson";
 export type ContentAssistantSection = ModulePlanSection | LessonApplySection;
@@ -45,8 +46,7 @@ export function ContentAiAssistant({ target, mode, targetId, initialTopic = "", 
   const [selected, setSelected] = useState<Section[]>(defaults[target]);
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState(false);
-  const [notice, setNotice] = useState("");
-  const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   const availableSections = useMemo(() => target === "module"
     ? defaults.module.filter((section) => section !== "concept_map" || suggestion?.instructional_plan.concept_map)
@@ -58,8 +58,6 @@ export function ContentAiAssistant({ target, mode, targetId, initialTopic = "", 
 
   async function generate() {
     setBusy(true);
-    setError("");
-    setNotice("");
     try {
       const base = getPayload();
       const payload = {
@@ -74,9 +72,9 @@ export function ContentAiAssistant({ target, mode, targetId, initialTopic = "", 
       const result = target === "module" ? await suggestModuleContent(payload) : await suggestLessonContent(payload);
       setSuggestion(result);
       setSelected(defaults[target].filter((section) => section !== "concept_map" || result.instructional_plan.concept_map).filter((section) => section !== "content" || result.content));
-      setNotice("Propuesta generada. Revísala y aplica solo las secciones que quieras conservar.");
+      showToast({ tone: "success", title: "Propuesta generada", message: "Revísala y aplica solo las secciones que quieras conservar." });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "No pudimos generar la propuesta.");
+      showToast(mapApiErrorToToast(caught, "No pudimos generar la propuesta."));
     } finally {
       setBusy(false);
     }
@@ -85,13 +83,11 @@ export function ContentAiAssistant({ target, mode, targetId, initialTopic = "", 
   async function apply() {
     if (!suggestion || selected.length === 0) return;
     setApplying(true);
-    setError("");
-    setNotice("");
     try {
       await onApply(suggestion, selected);
-      setNotice("Se aplicaron las secciones seleccionadas. Revisa el borrador antes de publicarlo.");
+      showToast({ tone: "success", title: "Propuesta aplicada", message: "Revisa el borrador antes de publicarlo." });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "No pudimos aplicar la propuesta.");
+      showToast(mapApiErrorToToast(caught, "No pudimos aplicar la propuesta."));
     } finally {
       setApplying(false);
     }
@@ -129,8 +125,6 @@ export function ContentAiAssistant({ target, mode, targetId, initialTopic = "", 
           <button type="button" onClick={apply} disabled={applying || selected.length === 0} className="button button-primary mt-5">{applying ? <CircleNotch size={18} className="animate-spin" /> : <Check size={18} />} {applying ? "Aplicando…" : "Aplicar selección"}</button>
         </div>
       </div> : null}
-      {notice ? <StatusNotice tone="success" className="mt-4">{notice}</StatusNotice> : null}
-      {error ? <StatusNotice tone="error" className="mt-4">{error}</StatusNotice> : null}
     </section>
   );
 }

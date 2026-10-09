@@ -7,10 +7,12 @@ import { useRouter } from "next/navigation";
 
 import { apiFetch, applyLessonContent, discardContentRevision, publishContentRevision } from "@/lib/api";
 import { collectMediaPathnames, deleteContentMedia, getMediaKind, importContentMedia, uploadContentMedia } from "@/lib/content-media";
+import { mapApiErrorToToast } from "@/lib/response-messages";
 import type { ContentSuggestion, Lesson, LessonApplySection, MediaReference, Module, ModulePlanSection, TiptapDocument, ContentRevision } from "@/lib/types";
 import { ContentAiAssistant } from "@/components/admin/content-ai-assistant";
 import { createContentExtensions } from "@/components/editor/media-extensions";
 import { StatusNotice } from "@/components/ui/status-notice";
+import { useToast } from "@/components/ui/toast";
 import { UrlDialog } from "@/components/ui/url-dialog";
 
 type FloatingPosition = { top: number; left: number };
@@ -60,6 +62,7 @@ function InlineSelectionMenu({ editor, position, onAddLink }: { editor: TiptapEd
 
 export function LessonEditor({ lesson, modules, initialModuleId, initialRevision }: { lesson?: Lesson; modules: Module[]; initialModuleId?: string; initialRevision?: ContentRevision | null }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<SelectionPosition>({ from: 1, to: 1 });
@@ -220,7 +223,9 @@ export function LessonEditor({ lesson, modules, initialModuleId, initialRevision
         instructional_plan: next,
         content: suggestion.content ?? undefined,
       });
-      if (response.revision) setRevision(response.revision);
+      if (response.revision) {
+        setRevision(response.revision);
+      }
     }
   }
 
@@ -229,9 +234,10 @@ export function LessonEditor({ lesson, modules, initialModuleId, initialRevision
     try {
       await publishContentRevision(revision.id);
       setRevision(null);
+      showToast({ tone: "success", title: "Revisión publicada", message: "La nueva versión de la lección ya está visible." });
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "No pudimos publicar la revisión.");
+      showToast(mapApiErrorToToast(caught, "No pudimos publicar la revisión."));
     }
   }
 
@@ -247,8 +253,9 @@ export function LessonEditor({ lesson, modules, initialModuleId, initialRevision
         setInstructionalPlan(lesson.instructional_plan);
         editor?.commands.setContent(lesson.content);
       }
+      showToast({ tone: "info", title: "Revisión descartada", message: "La lección publicada se mantuvo sin cambios." });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "No pudimos descartar la revisión.");
+      showToast(mapApiErrorToToast(caught, "No pudimos descartar la revisión."));
     }
   }
 

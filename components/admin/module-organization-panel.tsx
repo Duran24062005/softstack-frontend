@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 
 import { ContentAiAssistant, type ContentAssistantSection } from "@/components/admin/content-ai-assistant";
 import { StatusNotice } from "@/components/ui/status-notice";
+import { useToast } from "@/components/ui/toast";
 import { applyModuleContent, discardContentRevision, publishContentRevision } from "@/lib/api";
+import { mapApiErrorToToast } from "@/lib/response-messages";
 import type { ContentRevision, ContentSuggestion, Lesson, Module, ModulePlanSection } from "@/lib/types";
 
 export function ModuleOrganizationPanel({ module, lessons, initialRevision }: { module: Module; lessons: Lesson[]; initialRevision?: ContentRevision | null }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [revision, setRevision] = useState<ContentRevision | null>(initialRevision ?? null);
 
   async function applySuggestion(suggestion: ContentSuggestion, sections: ContentAssistantSection[]) {
@@ -28,21 +31,34 @@ export function ModuleOrganizationPanel({ module, lessons, initialRevision }: { 
       instructional_plan: suggestion.instructional_plan,
       lesson_orders: lessonOrders,
     });
-    if (response.revision) setRevision(response.revision);
-    else router.refresh();
+    if (response.revision) {
+      setRevision(response.revision);
+    } else {
+      router.refresh();
+    }
   }
 
   async function publishRevision() {
     if (!revision) return;
-    await publishContentRevision(revision.id);
-    setRevision(null);
-    router.refresh();
+    try {
+      await publishContentRevision(revision.id);
+      setRevision(null);
+      showToast({ tone: "success", title: "Revisión publicada", message: "La nueva organización ya está visible." });
+      router.refresh();
+    } catch (caught) {
+      showToast(mapApiErrorToToast(caught, "No pudimos publicar la revisión."));
+    }
   }
 
   async function discardRevision() {
     if (!revision) return;
-    await discardContentRevision(revision.id);
-    setRevision(null);
+    try {
+      await discardContentRevision(revision.id);
+      setRevision(null);
+      showToast({ tone: "info", title: "Revisión descartada", message: "El contenido publicado se mantuvo sin cambios." });
+    } catch (caught) {
+      showToast(mapApiErrorToToast(caught, "No pudimos descartar la revisión."));
+    }
   }
 
   return <>
