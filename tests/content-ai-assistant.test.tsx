@@ -17,6 +17,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 import { ContentAiAssistant } from "@/components/admin/content-ai-assistant";
+import { ToastProvider } from "@/components/ui/toast";
 
 const suggestion = {
   target_type: "module" as const,
@@ -49,15 +50,20 @@ describe("ContentAiAssistant", () => {
 
   afterEach(() => cleanup());
 
+  function renderAssistant(props: React.ComponentProps<typeof ContentAiAssistant>) {
+    return render(<ToastProvider><ContentAiAssistant {...props} /></ToastProvider>);
+  }
+
   it("generates a structured proposal and applies selected sections", async () => {
     const user = userEvent.setup();
     const onApply = vi.fn().mockResolvedValue(undefined);
     suggestModuleContentMock.mockResolvedValue(suggestion);
-    render(<ContentAiAssistant target="module" mode="create" getPayload={() => ({ title: "Comunicación" })} onApply={onApply} />);
+    renderAssistant({ target: "module", mode: "create", getPayload: () => ({ title: "Comunicación" }), onApply });
 
     await user.click(screen.getByRole("button", { name: /generar propuesta/i }));
     expect(await screen.findByText("Comunicación estratégica")).toBeInTheDocument();
-    expect(screen.getByText("Propuesta generada. Revísala y aplica solo las secciones que quieras conservar.")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Propuesta generada");
+    expect(screen.getByRole("status")).toHaveTextContent("Revísala y aplica solo las secciones que quieras conservar.");
     await user.click(screen.getByRole("button", { name: /aplicar selección/i }));
     expect(onApply).toHaveBeenCalledWith(suggestion, expect.arrayContaining(["objectives", "formats", "session_plan"]));
   });
@@ -65,7 +71,7 @@ describe("ContentAiAssistant", () => {
   it("surfaces provider errors", async () => {
     const user = userEvent.setup();
     suggestLessonContentMock.mockRejectedValue(new Error("El proveedor no está disponible."));
-    render(<ContentAiAssistant target="lesson" mode="create" getPayload={() => ({ title: "Lección" })} onApply={vi.fn()} />);
+    renderAssistant({ target: "lesson", mode: "create", getPayload: () => ({ title: "Lección" }), onApply: vi.fn() });
 
     await user.click(screen.getByRole("button", { name: /generar propuesta/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent("El proveedor no está disponible.");
