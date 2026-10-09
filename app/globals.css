@@ -1041,14 +1041,40 @@ select:focus-visible {
 }
 
 .tiptap-content ul,
+.editor-frame .ProseMirror ul {
+  list-style-type: disc;
+}
+
+.tiptap-content ol,
+.editor-frame .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.tiptap-content ul,
 .tiptap-content ol,
 .editor-frame .ProseMirror ul,
 .editor-frame .ProseMirror ol {
   margin: 1rem 0;
   max-width: 68ch;
   padding-left: 1.5rem;
+  list-style-position: outside;
   line-height: 1.8;
   color: rgba(15, 8, 75, .74);
+}
+
+.tiptap-content li,
+.editor-frame .ProseMirror li {
+  padding-left: .2rem;
+}
+
+.tiptap-content ul ul,
+.editor-frame .ProseMirror ul ul {
+  list-style-type: circle;
+}
+
+.tiptap-content ol ol,
+.editor-frame .ProseMirror ol ol {
+  list-style-type: lower-alpha;
 }
 
 .tiptap-content blockquote,
