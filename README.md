@@ -44,6 +44,14 @@ El proxy BFF de `app/api/backend/[...path]/route.ts` mantiene las cookies de ses
 
 La interfaz usa Tailwind v4, `motion/react` para animaciones accesibles y Tiptap para documentos estructurados.
 
+El CMS incluye un asistente IA reutilizable para módulos y lecciones. Solo
+propone objetivos, estructura, formatos, orden y bloques Tiptap: el editor
+selecciona qué aplicar. La generación de un módulo deja un blueprint y no crea
+lecciones automáticamente. En contenido publicado, aplicar una propuesta deja
+una revisión pendiente que debe publicarse explícitamente; mientras tanto el
+estudiante sigue viendo la versión vigente. Consulta el contrato y los límites
+en [`docs/006-ai-content-authoring.md`](docs/006-ai-content-authoring.md).
+
 ## Diseño Campuslands × SoftStack
 
 La interfaz usa una composición clara y prioriza fondos blancos con los colores
