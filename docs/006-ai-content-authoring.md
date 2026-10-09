@@ -23,6 +23,12 @@ blueprint: no crea automáticamente documentos de lección.
    publicado se muestra una revisión pendiente; el contenido público no cambia.
 6. El usuario puede publicar explícitamente la revisión o descartarla.
 
+Las respuestas de generación, aplicación, conflicto y publicación se muestran
+en un toast global en la parte superior central. Los errores HTTP se mapean a
+mensajes orientados a la acción para distinguir sesión, permisos, conflictos y
+fallos del proveedor. Los estados de progreso continuo, como una carga de
+media, permanecen junto al control que los inició.
+
 La organización existente presenta la propuesta antes de reordenar. Si el
 contenido cambió desde la generación, se muestra un conflicto y se debe
 regenerar para evitar perder trabajo manual.
