@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import { ToastProvider } from "@/components/ui/toast";
 import { poppins } from "./fonts";
 import "./globals.css";
 
@@ -33,7 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-full flex flex-col">
         <a href="#main-content" className="skip-link">Saltar al contenido</a>
         <div id="main-content" tabIndex={-1} className="flex min-h-full flex-1 flex-col">
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </div>
       </body>
     </html>
